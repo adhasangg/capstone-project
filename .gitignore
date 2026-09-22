@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment Variables & Secrets (CRITICAL: NEVER COMMIT)
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Build outputs
+dist/
+build/
+.output/
+.next/
+out/
+
+# Bun & Node runtime files
+bun.lockb
+*.log
+*.log.*
+
+# Testing & Coverage
+coverage/
+.nyc_output/
+
+# IDE & Editor files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Temporary & Cache
+.cache/
+tmp/
+scratch/
+.gitnexus/
