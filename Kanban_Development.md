@@ -9,13 +9,11 @@ Gunakan papan Kanban ini untuk melacak progres pengembangan SafeSpace PWA. Anda 
 - [ ] **Optimasi PWA**: Konfigurasi Service Worker, offline fallback, dan manifest untuk skor Lighthouse > 90.
 
 ## 📌 To Do (Akan Dikerjakan Sprint Ini)
-- [ ] **Setup Backend**: Inisialisasi ElysiaJS, integrasi `@safespace/db`, dan struktur layered modul auth.
 - [ ] **Setup Frontend**: Inisialisasi Vite + React.js, Tailwind CSS v4, dan komponen dasar Shadcn UI.
 - [ ] **Routing Frontend**: Setup TanStack Router dan struktur halaman (Login, Dashboard, Assessment, Chatroom).
 
 ## 🏃 In Progress (Sedang Dikerjakan)
-- [ ] **Modul Autentikasi (Google OAuth 2.0)**: Endpoint verifikasi token Google, domain whitelist validation, dan identity sanitization (one-way hashing).
-- [ ] **Manajemen Sesi & State**: Penerbitan anonim JWT dan setup TanStack Query di klien untuk caching status otentikasi.
+- [ ] **Manajemen Sesi & State Klien**: Integrasi Google Sign-In button dan TanStack Query di klien untuk caching status otentikasi.
 
 ## 🔍 In Review (Pengujian & QA)
 - *(Belum ada tiket di fase ini)*
@@ -31,6 +29,7 @@ Gunakan papan Kanban ini untuk melacak progres pengembangan SafeSpace PWA. Anda 
 - [x] **Inisiasi Proyek (Tahap 0)**: Setup Monorepo menggunakan Bun Workspaces, Biome linter, Git remote, dan GitNexus indexing.
 - [x] **Kernel Bersama (Tahap 1)**: Implementasi `@safespace/shared` (Strict types, Zod schemas, one-way crypto hash, pseudonym generator) dengan 100% unit test passing.
 - [x] **Skema Database & Migrasi (Tahap 2)**: Implementasi `@safespace/db` Drizzle ORM, pembuatan skema PostgreSQL (`users_auth`, `counselors_profile`, `counseling_sessions`, `messages`), dan migrasi sukses ke database live.
+- [x] **Backend Inisiasi & Modul Auth (Tahap 3)**: Setup ElysiaJS (`apps/api`), Swagger UI, CORS, JWT session, serta implementasi layered auth architecture (Route ≤150 LOC, Service ≤300 LOC, Repository ≤200 LOC) dengan TDD passing (32/32 tests).
 
 ---
 
