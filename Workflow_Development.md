@@ -73,14 +73,16 @@ Gunakan [Conventional Commits](https://www.conventionalcommits.org/):
    - Buka Pull Request ke `main`.
    - Wajibkan minimal 1 *Code Reviewer* untuk mengecek **keamanan enkripsi E2EE** dan **tidak adanya kebocoran data identitas**.
 
-## 5. Security & Privacy Checklist (Wajib Sebelum Rilis)
+## 5. Security, Privacy, & Logic Checklist (Wajib Sebelum Rilis)
 
 > [!CAUTION]  
-> Keamanan dan privasi (Double-Blind & E2EE) adalah pilar utama aplikasi ini. Setiap fitur baru harus melalui checklist ini.
+> Keamanan, privasi absolut (Two-Way Double-Blind & E2EE), serta validitas instrumen psikometrik adalah pilar utama aplikasi ini. Setiap fitur baru harus melalui checklist ini.
 
-- [ ] **Tidak ada Logging Identitas:** Pastikan `console.log` di backend TIDAK mencetak `email` atau `id` asli mahasiswa ke stdout.
-- [ ] **Validasi Token:** Semua rute peladen, terutama WebSocket, harus memverifikasi JWT JWT.
-- [ ] **Cek Parameter URL:** Router TanStack tidak menempatkan `counselor_id` asli atau `student_id` asli di path atau query params URL (gunakan *pseudonym* atau UUID tersamar).
+- [ ] **Tidak ada Logging Identitas:** Pastikan `console.log` di backend TIDAK mencetak `email` atau `id` asli pengguna ke stdout.
+- [ ] **Validasi Token & RBAC:** Semua rute peladen memverifikasi JWT. Rute konselor wajib menolak role `student` dengan status 403 Forbidden.
+- [ ] **Isolasi Database (Scoping):** Query repository untuk konselor dilarang keras melakukan relasi JOIN ke tabel `users_auth`.
+- [ ] **Two-Way Double-Blind:** Antarmuka mahasiswa hanya menampilkan nama samaran konselor (`Konselor_A` / `Psikolog_Athena`) dan router TanStack tidak memuat ID asli di URL.
+- [ ] **Validitas Komputasi DASS-21 & VAK:** Penilaian stres dan gaya belajar wajib dihitung secara deterministik matematika murni di `@safespace/shared`, bebas dari halusinasi diagnostik AI.
 - [ ] **Verifikasi E2EE:** Cek manual ke DB bahwa kolom `messages.encrypted_content` benar-benar terenkripsi base64/ciphertext, bukan plaintext.
 
 ## 6. Proses Deployment (CI/CD Pipeline)

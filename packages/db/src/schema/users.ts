@@ -1,6 +1,6 @@
 import { pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
-export const userRoleEnum = pgEnum('user_role', ['student', 'counselor']);
+export const userRoleEnum = pgEnum('user_role', ['student', 'counselor', 'admin']);
 
 export const usersAuth = pgTable('users_auth', {
   id: uuid('id').defaultRandom().primaryKey(),

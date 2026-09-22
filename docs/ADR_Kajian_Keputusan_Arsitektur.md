@@ -15,7 +15,9 @@
 3. [ADR-002: Pemilihan Basis Data — PostgreSQL dengan Drizzle ORM](#3-adr-002-pemilihan-basis-data--postgresql-dengan-drizzle-orm)
 4. [ADR-003: Arsitektur Realtime — ElysiaJS Native WebSocket & WebRTC P2P](#4-adr-003-arsitektur-realtime--elysiajs-native-websocket--webrtc-p2p)
 5. [ADR-004: Standardisasi Rekayasa Perangkat Lunak — Bun Monorepo, Biome, TDD, & GitNexus](#5-adr-004-standardisasi-rekayasa-perangkat-lunak--bun-monorepo-biome-tdd--gitnexus)
-6. [Matriks Ringkasan Keputusan](#6-matriks-ringkasan-keputusan)
+6. [ADR-005: Instrumen Psikometrik Baku (DASS-21 & VAK) dengan Formula Matematis vs Diagnostik LLM](#6-adr-005-instrumen-psikometrik-baku-dass-21--vak-dengan-formula-matematis-vs-diagnostik-llm)
+7. [ADR-006: Pertahanan Keamanan Berlapis (Two-Way Double-Blind & Defense-in-Depth RBAC)](#7-adr-006-pertahanan-keamanan-berlapis-two-way-double-blind--defense-in-depth-rbac)
+8. [Matriks Ringkasan Keputusan](#8-matriks-ringkasan-keputusan)
 
 ---
 
@@ -165,12 +167,87 @@ Diterapkan pemisahan tanggung jawab yang jelas (*Separation of Concerns*):
 
 ---
 
-## 6. Matriks Ringkasan Keputusan
+## 6. ADR-005: Instrumen Psikometrik Baku (DASS-21 & VAK) dengan Formula Matematis vs Diagnostik LLM
+
+### 6.1. Konteks Masalah
+Rancangan awal mengandalkan Large Language Model (LLM) untuk menentukan tingkat stres dan gaya belajar mahasiswa berdasarkan teks curhatan bebas. Dalam tinjauan etika klinis dan kaidah karya ilmiah, pendekatan ini memiliki kelemahan mendasar:
+1. **Risiko Halusinasi Klinis (*Diagnostic Hallucination*)**: Model LLM bersifat probabilistik dan tidak deterministik. Menggunakan LLM untuk menegakkan diagnosis atau mengukur skor tingkat stres berisiko menghasilkan kesimpulan psikologis yang keliru atau inkonsisten.
+2. **Ketiadaan Landasan Validitas Psikometrik**: Pengujian di hadapan dewan penguji akademis memerlukan instrumen baku yang telah tervalidasi secara internasional melalui uji reliabilitas dan validitas konstruk (*Cronbach's Alpha*).
+
+### 6.2. Keputusan Arsitektur
+1. **Penerapan Instrumen Baku DASS-21 (Lovibond & Lovibond, 1995)**:
+   - Pengukuran tingkat *Depression*, *Anxiety*, dan *Stress* menggunakan 21 butir pernyataan baku (skala Likert 0–3).
+   - Perhitungan dilakukan murni secara **deterministik matematis**:
+     $$\text{Score} = \left( \sum_{i \in \text{Subscale}} \text{Item}_i \right) \times 2$$
+   - Skor diklasifikasikan ke dalam 5 tingkatan baku: *Normal*, *Mild*, *Moderate*, *Severe*, dan *Extremely Severe*.
+2. **Penerapan Instrumen Gaya Belajar VAK**:
+   - Menghitung modalitas belajar (*Visual*, *Auditory*, *Kinesthetic*) melalui kuesioner dinamis (format ringkas default 12 butir dan format lengkap hingga 30 butir).
+   - Ditentukan secara matematis berdasarkan modalitas dengan akumulasi persentase tertinggi.
+3. **Reposisi dan Reduksi Peran AI (LLM)**:
+   - LLM "diturunkan pangkatnya" murni untuk **Mood Tracker harian**: menganalisis sentimen dari curhatan teks bebas untuk menghasilkan kalimat respon empati yang menenangkan dan merekomendasikan rujukan pembukaan tiket pra-konseling jika kondisi terindikasi berat.
+
+### 6.3. Konsekuensi & Manfaat
+- Menjamin validitas ilmiah pada naskah skripsi/capstone.
+- Beban komputasi server ElysiaJS menjadi jauh lebih ringan dan hemat biaya API LLM karena kalkulasi skor ditangani secara instan di kernel lokal.
+
+---
+
+## 7. ADR-006: Pertahanan Keamanan Berlapis (Two-Way Double-Blind & Defense-in-Depth RBAC)
+
+### 7.1. Konteks Masalah
+Pada sistem konseling konvensional, staf konselor sering kali mengetahui identitas mahasiswa atau sebaliknya, mahasiswa mengetahui identitas asli konselor. Hal ini memicu:
+1. Keengganan mahasiswa berkonsultasi karena takut dinilai (*judgmental fear*).
+2. Potensi bias pemilihan konselor (*counselor shopping*).
+3. Risiko staf konselor menjadi sasaran pelampiasan emosional mahasiswa di luar sistem (*doxxing/harassment*).
+4. Potensi kebocoran data jika hak akses API hanya dibatasi di sisi antarmuka pengguna (*frontend UI*).
+
+### 7.2. Keputusan Arsitektur
+Diterapkan arsitektur keamanan lapis ganda (*Defense-in-Depth*):
+
+```
+                                  PERMINTAAN KLIEN
+                                         │
+                                         ▼
+                   ┌───────────────────────────────────────────┐
+                   │        LAPISAN 1: API MIDDLEWARE          │
+                   │           (ElysiaJS Router Guard)         │
+                   │  - Verifikasi Sesi JWT                    │
+                   │  - Cek Role: Mahasiswa vs Konselor        │
+                   │  - Jika role = student akses antrean      │
+                   │    konselor ──► TOLAK (403 Forbidden)     │
+                   └─────────────────────┬─────────────────────┘
+                                         │ (Lolos Validasi)
+                                         ▼
+                   ┌───────────────────────────────────────────┐
+                   │        LAPISAN 2: DATABASE SCOPING        │
+                   │             (Drizzle ORM Layer)           │
+                   │  - Query konselor diisolasi               │
+                   │  - DILARANG JOIN ke tabel `users_auth`    │
+                   │  - Hanya menarik `counseling_sessions`    │
+                   │    dengan lampiran `dass21_score` (JSONB) │
+                   └───────────────────────────────────────────┘
+```
+
+1. **Two-Way Double-Blind**:
+   - Mahasiswa beridentitas `Mahasiswa #XXXX`.
+   - Konselor dianonimkan dari mahasiswa dengan nama samaran seperti `Konselor_A` atau `Psikolog_Athena`.
+2. **Defense-in-Depth RBAC**:
+   - **Level API:** Middleware ElysiaJS memverifikasi role JWT. Endpoint dasbor konselor memblokir role `student` dengan status HTTP 403.
+   - **Level ORM:** Method repository konselor dirancang terisolasi secara struktural tanpa kapabilitas melakukan relasi JOIN ke tabel `users_auth`.
+
+---
+
+## 8. Matriks Ringkasan Keputusan
 
 | Dimensi | Desain Awal | Desain Mutakhir (ADR) | Justifikasi Akademis |
 |---|---|---|---|
-| **Otentikasi Identitas** | OTP Email Institusi | Google OAuth 2.0 + Domain Whitelist + One-Way Identity Hashing | Menghilangkan friksi birokrasi, siap adopsi multi-kampus, privasi anonim absolut terjamin. |
-| **Basis Data** | MariaDB / PostgreSQL | **PostgreSQL** + Drizzle ORM | Dukungan UUIDv7 native, JSONB terindeks, Listen/Notify untuk event realtime, dan kesiapan ekstensi AI. |
-| **Kanal Realtime** | WebSocket konvensional | ElysiaJS Bun Native WebSocket (C++ uWS) + WebRTC P2P | Throughput tinggi di memori server untuk chat, P2P bebas beban server untuk streaming audio/video. |
-| **Kualitas Kode** | ESLint + Prettier | **Biome** (Zero-Any, Zero-Unknown, Rust-powered) | Kecepatan build, standardisasi ketat, pencegahan celah tipe data di masa kompilasi. |
-| **Indeks Repositori** | Manual | **GitNexus** (Knowledge Graph Code Indexing) | Memastikan keterlacakan simbol dan integritas arsitektur monorepo. |
+| **Posisi Produk** | Sistem Konseling Alternatif | **Sistem Pra-Konseling (Deteksi Dini Burnout)** | Sebagai P3K psikologis dan jembatan ke MyScout UT tanpa tumpang tindih birokrasi. |
+| **Otentikasi & RBAC** | OTP Email Institusi | Google OAuth 2.0 + Domain Whitelist + Hashing + RBAC Lapis Ganda | Fleksibel multi-kampus, zero identity storage, proteksi struktural via API & ORM scoping. |
+| **Pemetaan Diri** | Diagnostik Bebas LLM | **Instrumen Baku DASS-21 & VAK (Matematika Murni)** | Menghindari halusinasi klinis AI, validitas psikometrik teruji secara internasional. |
+| **Peran AI (LLM)** | Menilai Tingkat Stres | **Empathetic Mood Tracker** | Murni membaca sentimen narasi curhatan bebas dan memberi afirmasi empati rujukan. |
+| **Basis Data** | MariaDB / PostgreSQL | **PostgreSQL** + Drizzle ORM (JSONB Lampiran Profil) | Menyimpan profil DASS-21/VAK langsung terlampir di tiket tanpa konselor bertanya dari nol. |
+| **Anonimitas Obrolan** | Satu Arah (Mahasiswa saja) | **Two-Way Double-Blind** (Mahasiswa & Konselor) | Mencegah bias pemilihan konselor dan melindungi staf dari potensi penargetan identitas. |
+| **Kanal Realtime** | WebSocket konvensional | ElysiaJS Bun Native WebSocket + WebRTC P2P | Throughput mikrodetik di memory server dan streaming media bebas beban server. |
+| **Kualitas Kode** | ESLint + Prettier | **Biome** (Zero-Any, Zero-Unknown) + TDD | Menjamin integritas tipe data dan keandalan logika algoritma kriptografi/skor. |
+| **Indeks Repositori** | Manual | **GitNexus** (Knowledge Graph Code Indexing) | Menjaga keterlacakan graf dependensi monorepo. |
+

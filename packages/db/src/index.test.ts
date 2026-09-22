@@ -23,6 +23,11 @@ describe('packages/db schemas and config', () => {
     expect(getTableName(messages)).toBe('messages');
   });
 
+  it('should define vakResult and dass21Score columns on counseling_sessions', () => {
+    expect(counselingSessions.vakResult).toBeDefined();
+    expect(counselingSessions.dass21Score).toBeDefined();
+  });
+
   it('should read database config with fallback defaults', () => {
     const config = getDatabaseConfig();
     expect(config.host).toBeDefined();

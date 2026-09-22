@@ -23,6 +23,17 @@ export type {
   ApiResponse,
 } from './types/api.types';
 
+export type {
+  Dass21Category,
+  Dass21SubscaleResult,
+  Dass21Result,
+  VakModality,
+  VakModalityScore,
+  VakResult,
+  MoodSentimentCategory,
+  MoodTrackerAnalysis,
+} from './types/assessment.types';
+
 // Validators & Schemas
 export {
   googleAuthSchema,
@@ -39,3 +50,5 @@ export {
 // Utilities
 export { hashIdentity } from './utils/crypto.utils';
 export { generatePseudonym } from './utils/pseudonym.utils';
+export { calculateDass21Score } from './utils/dass21.utils';
+export { calculateVakScore } from './utils/vak.utils';

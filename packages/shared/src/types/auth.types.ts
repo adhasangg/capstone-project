@@ -1,4 +1,4 @@
-export type UserRole = 'student' | 'counselor';
+export type UserRole = 'student' | 'counselor' | 'admin';
 
 export interface UserAuthSession {
   readonly userId: string;
