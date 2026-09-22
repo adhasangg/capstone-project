@@ -1,7 +1,16 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "files": {
-    "ignore": ["node_modules", "dist", "build", ".next", "coverage", "bun.lockb"]
+    "ignore": [
+      "node_modules",
+      "dist",
+      "build",
+      ".next",
+      "coverage",
+      "bun.lockb",
+      ".gitnexus",
+      ".claude"
+    ]
   },
   "organizeImports": {
     "enabled": true

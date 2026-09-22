@@ -10,7 +10,10 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:generate": "bun --env-file=.env --filter @safespace/db generate",
+    "db:push": "bun --env-file=.env --filter @safespace/db push",
+    "db:studio": "bun --env-file=.env --filter @safespace/db studio"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

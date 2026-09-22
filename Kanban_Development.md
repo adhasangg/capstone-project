@@ -9,10 +9,8 @@ Gunakan papan Kanban ini untuk melacak progres pengembangan SafeSpace PWA. Anda 
 - [ ] **Optimasi PWA**: Konfigurasi Service Worker, offline fallback, dan manifest untuk skor Lighthouse > 90.
 
 ## 📌 To Do (Akan Dikerjakan Sprint Ini)
-- [ ] **Inisiasi Proyek**: Setup Monorepo menggunakan Bun Workspaces.
-- [ ] **Setup Backend**: Inisialisasi ElysiaJS, Drizzle ORM, dan koneksi ke database PostgreSQL.
+- [ ] **Setup Backend**: Inisialisasi ElysiaJS, integrasi `@safespace/db`, dan struktur layered modul auth.
 - [ ] **Setup Frontend**: Inisialisasi Vite + React.js, Tailwind CSS v4, dan komponen dasar Shadcn UI.
-- [ ] **Skema Database**: Buat dan migrasi skema tabel PostgreSQL (`users_auth`, `counselors_profile`, `counseling_sessions`, `messages`).
 - [ ] **Routing Frontend**: Setup TanStack Router dan struktur halaman (Login, Dashboard, Assessment, Chatroom).
 
 ## 🏃 In Progress (Sedang Dikerjakan)
@@ -30,6 +28,9 @@ Gunakan papan Kanban ini untuk melacak progres pengembangan SafeSpace PWA. Anda 
 - [x] **Requirement Gathering**: PRD dan Dokumen Arsitektur Selesai.
 - [x] **Tech Stack Selection**: Pemilihan stack (Bun, Elysia, React, dll) disetujui.
 - [x] **Architectural Decision Records (ADR)**: Dokumen kajian akademis (Google OAuth 2.0 vs OTP, PostgreSQL vs MariaDB) terdokumentasi di `docs/ADR_Kajian_Keputusan_Arsitektur.md`.
+- [x] **Inisiasi Proyek (Tahap 0)**: Setup Monorepo menggunakan Bun Workspaces, Biome linter, Git remote, dan GitNexus indexing.
+- [x] **Kernel Bersama (Tahap 1)**: Implementasi `@safespace/shared` (Strict types, Zod schemas, one-way crypto hash, pseudonym generator) dengan 100% unit test passing.
+- [x] **Skema Database & Migrasi (Tahap 2)**: Implementasi `@safespace/db` Drizzle ORM, pembuatan skema PostgreSQL (`users_auth`, `counselors_profile`, `counseling_sessions`, `messages`), dan migrasi sukses ke database live.
 
 ---
 
