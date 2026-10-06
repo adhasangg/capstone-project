@@ -44,7 +44,9 @@ export {
 export {
   senderTypeEnum,
   encryptedMessageSchema,
+  sendChatMessageSchema,
   type EncryptedMessageInput,
+  type SendChatMessageInput,
 } from './validators/chat.schema';
 
 export {

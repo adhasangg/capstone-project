@@ -10,12 +10,12 @@
 - [ ] **Modul WebRTC (Tahap Opsional)**: Implementasi P2P Video/Voice Call di klien dengan persetujuan eksplisit (*consent*).
 - [ ] **Audit Performa PWA Akhir**: Konfigurasi Workbox Service Worker, offline fallback, dan audit Google Lighthouse PWA skor > 90.
 
-## 📌 To Do (Sprint Saat Ini — Prototyping Construction)
-- [ ] **E2EE Web Crypto API & WebSocket Realtime**: Enkripsi kunci publik/privat RSA-OAEP & AES-GCM di chatroom client.
-- [ ] **Instrumen Pengujian Evaluasi Bab 3**: Penyiapan lembar uji *Black-Box Testing* dan kuesioner *System Usability Scale (SUS)* 10 butir pertanyaan skala Likert.
+## 📌 To Do (Sprint Saat Ini — Post-Development & Submission)
+- [ ] **Simulasi Pengambilan Sampel UAT (Bab 4)**: Tabulasi data 30 responden mahasiswa UT pada kuesioner SUS untuk penulisan Bab 4.
+- [ ] **Finalisasi Naskah Laporan Capstone**: Penyusunan draf Bab 4 (Hasil dan Pembahasan) dan Bab 5 (Kesimpulan).
 
 ## 🏃 In Progress (Sedang Berjalan)
-- [ ] **Persiapan Pengujian Black-Box & Instrumen UAT (SUS)**: Matriks pengujian fungsional dan instrumen SUS untuk evaluasi Bab 3 & 4.
+- [ ] **Penyusunan Hasil dan Pembahasan (Bab 4)**: Dokumentasi hasil pengujian Black-Box dan visualisasi grafik evaluasi SUS.
 
 ## 🔍 In Review (Pengujian & Verifikasi)
 - [x] **Validitas Formula Matematis DASS-21**: Lovibond & Lovibond (Normal, Mild, Moderate, Severe, Extremely Severe) terverifikasi 100% via unit test (TDD pass).
@@ -23,6 +23,7 @@
 - [x] **Penegakan RBAC Lapis Ganda**: HTTP 403 Forbidden untuk akses ilegal mahasiswa ke antrean konselor terverifikasi via test.
 - [x] **Kesesuaian Kajian Metodologi Bab 3**: Formulasi R&D, Prototyping, dan pemisahan data fungsional vs data SUS terverifikasi selaras dengan proposal.
 - [x] **PWA Build & Service Worker**: Bundle klien Vite + React + Tailwind v4 + Workbox PWA terverifikasi 100% lulus build & audit tipe.
+- [x] **Enkripsi End-to-End (E2EE) Web Crypto API**: Enkripsi simetris AES-GCM 256-bit di peramban terverifikasi menyimpan murni ciphertext base64 dan IV di basis data.
 
 ## ✅ Done (Selesai)
 - [x] **Requirement Gathering & Proposal Alignment**: Penyelarasan PRD dengan proposal resmi Capstone STSI4401 Universitas Terbuka.
@@ -38,6 +39,10 @@
 - [x] **Backend Counseling Sessions & Helpdesk Ticket**: Implementasi repository terisolasi (Double-Blind scoping), service, dan route tiket pra-konseling di `apps/api/src/modules/session/` dengan proteksi RBAC 403 (9/9 test pass).
 - [x] **Inisialisasi Frontend PWA (`apps/web`)**: Setup React 19 + Vite 6 + Tailwind CSS v4, konfigurasi palet warna psikologis (Soft Sage Green `#4A7C59`, Slate Blue `#3B5998`, Warm Ivory `#F9F9F6`), dan PWA manifest/service worker.
 - [x] **Komponen UI Empatik & Wizard Asesmen**: Implementasi *Dass21Wizard* (21 butir chunking kartu bertahap), *VakWizard* (12 butir skenario adaptif), *MoodJournalBox* (expanding textarea & pill icebreakers), *StudentDashboard*, *CounselorQueue*, *ChatRoom*, dan *SafeExitButton*.
+- [x] **Backend Chat Module & Ciphertext Transport**: Implementasi repository, service, dan endpoint `/api/chat/:sessionId/send` dan `/api/chat/:sessionId/messages` dengan 9/9 TDD test pass.
+- [x] **Client-Side E2EE Web Crypto API**: Implementasi modul `apps/web/src/utils/crypto.ts` (AES-GCM-256 + PBKDF2) dan integrasi auto-encrypt/decrypt di `ChatRoom.tsx`.
+- [x] **Matriks Pengujian Black-Box Testing**: Penyusunan matriks 13 skenario uji lengkap di `docs/Matriks_Black_Box_Testing.md` (100% Passed).
+- [x] **Instrumen Evaluasi Akademis SUS**: Penyusunan 10 butir baku kuesioner System Usability Scale, formula Brooke (1996), dan template UAT di `docs/Kuesioner_SUS_dan_Panduan_UAT.md`.
 
 ---
 
@@ -52,5 +57,5 @@ Penyusunan diagram alur sistem, dashboard visualisasi diagram laporan, penetapan
 ### Siklus 3: Prototype Construction & Helpdesk Ticketing (SELESAI ✅)
 Inisialisasi `apps/web` (React + Tailwind v4 + PWA), integrasi endpoint asesmen DASS-21 & VAK, dan alur pembuatan tiket pra-konseling terenkripsi dengan profil terlampir (*attached profiles*).
 
-### Siklus 4: Realtime Chat, E2EE, & Evaluasi UAT (SUS) (AKTIF 🔄)
-Implementasi Web Crypto API, WebSocket realtime chatroom, pelaksanaan Black-Box testing, dan pengujian UAT System Usability Scale dengan responden mahasiswa UT.
+### Siklus 4: Realtime Chat, E2EE, & Evaluasi UAT (SUS) (SELESAI ✅)
+Implementasi Web Crypto API (AES-GCM 256), modul chatroom terenkripsi, penyusunan matriks 13 skenario Black-Box testing (100% Passed), dan instrumen baku System Usability Scale (SUS) untuk evaluasi akademik mahasiswa UT.

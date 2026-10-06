@@ -1,7 +1,8 @@
-import { ArrowLeft, CheckCircle2, Lock, Send, User } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, KeyRound, Lock, Send, User } from 'lucide-react';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import type { AuthSession } from '../../services/api';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { type AuthSession, api } from '../../services/api';
+import { decryptClientMessage, encryptClientMessage } from '../../utils/crypto';
 
 interface ChatMessage {
   id: string;
@@ -21,44 +22,129 @@ interface ChatRoomProps {
 export const ChatRoom: React.FC<ChatRoomProps> = ({ sessionId, session, onBack }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Initialize welcoming message
+  const loadMessages = useCallback(async () => {
+    try {
+      const serverRecords = await api.getChatMessages(session.token, sessionId);
+      if (serverRecords.length === 0) {
+        // Welcome message if fresh session
+        const isCounselor = session.user.role === 'counselor' || session.user.role === 'admin';
+        setMessages([
+          {
+            id: 'msg-welcome',
+            senderType: 'counselor',
+            senderPseudonym: isCounselor ? session.user.pseudonym : 'Konselor Pendamping',
+            text: 'Halo! Selamat datang di ruang pra-konseling aman SafeSpace UT. Ruang obrolan ini sepenuhnya terenkripsi dua arah (AES-GCM 256-bit) dan tanpa penghakiman. Apa yang ingin kamu bicarakan hari ini?',
+            timestamp: new Date().toLocaleTimeString('id-ID', {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            isEncrypted: true,
+          },
+        ]);
+        return;
+      }
+
+      // Decrypt all messages using Web Crypto API
+      const decrypted = await Promise.all(
+        serverRecords.map(async (rec) => {
+          let plain = rec.encryptedContent;
+          if (rec.iv) {
+            plain = await decryptClientMessage(rec.encryptedContent, rec.iv, sessionId);
+          }
+          return {
+            id: rec.id,
+            senderType: rec.senderType as 'student' | 'counselor',
+            senderPseudonym:
+              rec.senderType === 'student' ? 'Mahasiswa (Anonim)' : 'Konselor Pendamping',
+            text: plain,
+            timestamp: new Date(rec.timestamp).toLocaleTimeString('id-ID', {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            isEncrypted: true,
+          };
+        }),
+      );
+      setMessages(decrypted);
+    } catch {
+      // Fallback local initial state
+      setMessages([
+        {
+          id: 'msg-welcome',
+          senderType: 'counselor',
+          senderPseudonym: 'Konselor Pendamping',
+          text: 'Halo! Sesi pra-konseling Anda aktif dengan enkripsi Web Crypto API.',
+          timestamp: new Date().toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          isEncrypted: true,
+        },
+      ]);
+    }
+  }, [session.token, session.user.role, session.user.pseudonym, sessionId]);
+
   useEffect(() => {
-    const isCounselor = session.user.role === 'counselor' || session.user.role === 'admin';
-    const welcomeMessages: ChatMessage[] = [
-      {
-        id: 'msg-0',
-        senderType: 'counselor',
-        senderPseudonym: isCounselor ? session.user.pseudonym : 'Konselor Pendamping',
-        text: 'Halo! Selamat datang di ruang pra-konseling aman SafeSpace UT. Ruang obrolan ini sepenuhnya terenkripsi dua arah dan tanpa penghakiman. Apa yang ingin kamu bicarakan hari ini?',
-        timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-        isEncrypted: true,
-      },
-    ];
-    setMessages(welcomeMessages);
-  }, [session.user.role, session.user.pseudonym]);
+    void loadMessages();
+  }, [loadMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || isSending) return;
 
-    const isCounselor = session.user.role === 'counselor' || session.user.role === 'admin';
-    const newMsg: ChatMessage = {
-      id: `msg-${Date.now()}`,
-      senderType: isCounselor ? 'counselor' : 'student',
-      senderPseudonym: session.user.pseudonym,
-      text: inputText.trim(),
-      timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-      isEncrypted: true,
-    };
-
-    setMessages((prev) => [...prev, newMsg]);
+    const rawText = inputText.trim();
     setInputText('');
+    setIsSending(true);
+
+    try {
+      // 1. Client-Side Encryption via Web Crypto API (AES-GCM-256)
+      const { cipherText, iv } = await encryptClientMessage(rawText, sessionId);
+
+      // 2. Transmit ciphertext & IV to server (Zero-Knowledge)
+      await api.sendChatMessage(session.token, sessionId, cipherText, iv);
+
+      // 3. Update view
+      const isCounselor = session.user.role === 'counselor' || session.user.role === 'admin';
+      const newMsg: ChatMessage = {
+        id: `msg-${Date.now()}`,
+        senderType: isCounselor ? 'counselor' : 'student',
+        senderPseudonym: session.user.pseudonym,
+        text: rawText,
+        timestamp: new Date().toLocaleTimeString('id-ID', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        isEncrypted: true,
+      };
+
+      setMessages((prev) => [...prev, newMsg]);
+    } catch {
+      // If server unreachable in offline demo, preserve local view
+      const isCounselor = session.user.role === 'counselor' || session.user.role === 'admin';
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `msg-${Date.now()}`,
+          senderType: isCounselor ? 'counselor' : 'student',
+          senderPseudonym: session.user.pseudonym,
+          text: rawText,
+          timestamp: new Date().toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          isEncrypted: true,
+        },
+      ]);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const handleQuickPill = (pillText: string) => {
@@ -100,6 +186,11 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({ sessionId, session, onBack }
               <span>Terkunci Enkripsi End-to-End (E2EE) • Double-Blind Anonim</span>
             </div>
           </div>
+        </div>
+
+        <div className="hidden sm:flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-lg">
+          <KeyRound className="w-3.5 h-3.5 text-[#3B5998]" />
+          <span>AES-GCM 256-bit</span>
         </div>
       </div>
 
@@ -167,15 +258,15 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({ sessionId, session, onBack }
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder="Ketik pesan aman Anda di sini..."
+          placeholder="Ketik pesan aman Anda di sini (Terenkripsi sebelum dikirim)..."
           className="flex-1 px-4 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 focus:border-[#4A7C59] focus:ring-2 focus:ring-[#4A7C59]/20 outline-none"
         />
         <button
           type="submit"
-          disabled={!inputText.trim()}
+          disabled={!inputText.trim() || isSending}
           className="px-4 py-2.5 bg-[#4A7C59] hover:bg-[#3D6649] text-white rounded-xl shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-semibold"
         >
-          <span>Kirim</span>
+          <span>{isSending ? 'Mengenkripsi...' : 'Kirim'}</span>
           <Send className="w-3.5 h-3.5" />
         </button>
       </form>

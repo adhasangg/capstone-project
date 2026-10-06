@@ -147,4 +147,72 @@ export const api = {
     }
     return json.data;
   },
+
+  // Chat / Messages (E2EE)
+  async sendChatMessage(
+    token: string,
+    sessionId: string,
+    encryptedContent: string,
+    iv?: string,
+  ): Promise<{
+    id: string;
+    sessionId: string;
+    senderType: string;
+    encryptedContent: string;
+    iv?: string | null;
+    timestamp: string;
+  }> {
+    const res = await fetch(`${BASE_URL}/chat/${sessionId}/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ encryptedContent, iv }),
+    });
+    const json: ApiResponse<{
+      id: string;
+      sessionId: string;
+      senderType: string;
+      encryptedContent: string;
+      iv?: string | null;
+      timestamp: string;
+    }> = await res.json();
+    if (!json.success) {
+      throw new Error(json.error.message || 'Gagal mengirim pesan');
+    }
+    return json.data;
+  },
+
+  async getChatMessages(
+    token: string,
+    sessionId: string,
+  ): Promise<
+    Array<{
+      id: string;
+      sessionId: string;
+      senderType: 'student' | 'counselor' | 'system';
+      encryptedContent: string;
+      iv?: string | null;
+      timestamp: string;
+    }>
+  > {
+    const res = await fetch(`${BASE_URL}/chat/${sessionId}/messages`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const json: ApiResponse<
+      Array<{
+        id: string;
+        sessionId: string;
+        senderType: 'student' | 'counselor' | 'system';
+        encryptedContent: string;
+        iv?: string | null;
+        timestamp: string;
+      }>
+    > = await res.json();
+    if (!json.success) {
+      throw new Error(json.error.message || 'Gagal memuat pesan');
+    }
+    return json.data;
+  },
 };

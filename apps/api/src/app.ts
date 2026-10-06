@@ -8,6 +8,9 @@ import { AssessmentService } from './modules/assessment/assessment.service';
 import { AuthRepository } from './modules/auth/auth.repository';
 import { createAuthRoute } from './modules/auth/auth.route';
 import { AuthService } from './modules/auth/auth.service';
+import { ChatRepository } from './modules/chat/chat.repository';
+import { createChatRoute } from './modules/chat/chat.route';
+import { ChatService } from './modules/chat/chat.service';
 import { SessionRepository } from './modules/session/session.repository';
 import { createSessionRoute } from './modules/session/session.route';
 import { SessionService } from './modules/session/session.service';
@@ -23,6 +26,8 @@ export function createServerApp() {
   const assessmentService = new AssessmentService();
   const sessionRepository = new SessionRepository(db);
   const sessionService = new SessionService(sessionRepository);
+  const chatRepository = new ChatRepository(db);
+  const chatService = new ChatService(chatRepository);
 
   return new Elysia()
     .use(
@@ -67,6 +72,12 @@ export function createServerApp() {
     .use(
       createSessionRoute({
         sessionService,
+        jwtSecret: config.jwtSecret,
+      }),
+    )
+    .use(
+      createChatRoute({
+        chatService,
         jwtSecret: config.jwtSecret,
       }),
     );
