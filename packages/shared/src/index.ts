@@ -47,6 +47,20 @@ export {
   type EncryptedMessageInput,
 } from './validators/chat.schema';
 
+export {
+  dass21InputSchema,
+  vakInputSchema,
+  moodNarrativeInputSchema,
+  type Dass21Input,
+  type VakInput,
+  type MoodNarrativeInput,
+} from './validators/assessment.schema';
+
+export {
+  createSessionInputSchema,
+  type CreateSessionInput,
+} from './validators/session.schema';
+
 // Utilities
 export { hashIdentity } from './utils/crypto.utils';
 export { generatePseudonym } from './utils/pseudonym.utils';

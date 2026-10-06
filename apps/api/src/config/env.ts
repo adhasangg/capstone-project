@@ -12,8 +12,8 @@ export function loadApiConfig(): ApiConfig {
   const allowedDomainsRaw = process.env.ALLOWED_EMAIL_DOMAINS || 'ecampus.ut.ac.id,*';
   const allowedEmailDomains = allowedDomainsRaw
     .split(',')
-    .map((d) => d.trim())
-    .filter((d) => d.length > 0);
+    .map((d: string) => d.trim())
+    .filter((d: string) => d.length > 0);
 
   const pepper =
     process.env.IDENTITY_PEPPER_SECRET || 'safespace_default_dev_pepper_secret_123456789';

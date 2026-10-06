@@ -1,53 +1,55 @@
 # Kanban Pengerjaan Proyek: SafeSpace PWA
 
-Gunakan papan Kanban ini untuk melacak progres pengembangan SafeSpace PWA. Anda dapat memindahkannya ke Jira, Trello, atau GitHub Projects.
-
-## 📝 Backlog (Belum Dikerjakan)
-- [ ] **Desain & UI/UX**: Buat wireframe dan mockup antarmuka dengan pendekatan desain empatik.
-- [ ] **Modul WebRTC (Tahap 2)**: Implementasi signaling server di ElysiaJS.
-- [ ] **Modul WebRTC (Tahap 2)**: Implementasi P2P Video/Voice Call di klien dengan persetujuan (consent).
-- [ ] **Optimasi PWA**: Konfigurasi Service Worker, offline fallback, dan manifest untuk skor Lighthouse > 90.
-
-## 📌 To Do (Akan Dikerjakan Sprint Ini)
-- [ ] **Modul Asesmen Matematika Baku**: Implementasi kalkulator DASS-21 (Lovibond & Lovibond) dan VAK (Visual, Auditory, Kinesthetic format dinamis 12/30) di `@safespace/shared` via TDD.
-- [ ] **Migrasi Database PostgreSQL (JSONB)**: Tambahkan kolom `vak_result` dan `dass21_score` pada tabel `counseling_sessions`, serta enum role `admin`.
-- [ ] **RBAC Middleware & Query Scoping**: Penjaga rute ElysiaJS 403 Forbidden dan isolasi relasi ORM untuk konselor (Double-Blind dua arah).
-- [ ] **Setup Frontend PWA**: Inisialisasi Vite + React.js, Tailwind CSS v4, komponen empatik (Pill Icebreakers, expanding textarea, dialog, toast).
-- [ ] **Routing Frontend**: Setup TanStack Router dan struktur halaman (Login, Dashboard, Assessment, Chatroom).
-
-## 🏃 In Progress (Sedang Dikerjakan)
-- [ ] **Manajemen Sesi & State Klien**: Integrasi Google Sign-In button dan TanStack Query di klien untuk caching status otentikasi.
-
-## 🔍 In Review (Pengujian & QA)
-- *(Belum ada tiket di fase ini)*
-*(Catatan: Pindahkan tiket ke sini setelah implementasi selesai untuk dilakukan Code Review dan Testing)*
-  - Contoh yang akan diuji:
-    - *Validitas Formula Matematis DASS-21 (Normal, Mild, Moderate, Severe, Extremely Severe).*
-    - *Akurasi Modalitas Belajar VAK (Format 12 & Format 30).*
-    - *Penegakan RBAC Lapis Ganda (HTTP 403 untuk akses ilegal & isolasi users_auth).*
-    - *Black-Box Testing pada Database untuk `encrypted_content`.*
-
-## ✅ Done (Selesai)
-- [x] **Requirement Gathering**: PRD dan Dokumen Arsitektur Selesai (Reposisi Pra-Konseling & Deteksi Dini Academic Burnout).
-- [x] **Tech Stack Selection**: Pemilihan stack (Bun, Elysia, React, PostgreSQL, dll) disetujui.
-- [x] **Architectural Decision Records (ADR)**: Kajian akademis (ADR-001 s.d. ADR-006) terdokumentasi di `docs/ADR_Kajian_Keputusan_Arsitektur.md`.
-- [x] **Inisiasi Proyek (Tahap 0)**: Setup Monorepo menggunakan Bun Workspaces, Biome linter, Git remote, dan GitNexus indexing.
-- [x] **Kernel Bersama (Tahap 1)**: Implementasi `@safespace/shared` (Strict types, Zod schemas, one-way crypto hash, pseudonym generator) dengan 100% unit test passing.
-- [x] **Skema Database & Migrasi (Tahap 2)**: Implementasi `@safespace/db` Drizzle ORM, pembuatan skema PostgreSQL (`users_auth`, `counselors_profile`, `counseling_sessions`, `messages`), dan migrasi sukses ke database live.
-- [x] **Backend Inisiasi & Modul Auth (Tahap 3)**: Setup ElysiaJS (`apps/api`), Swagger UI, CORS, JWT session, serta implementasi layered auth architecture (Route ≤150 LOC, Service ≤300 LOC, Repository ≤200 LOC) dengan TDD passing (32/32 tests).
+**Judul Capstone:** Pengembangan Sistem PraKonseling Anonim dan Pemetaan Potensi Diri untuk Deteksi Dini Academic Burnout pada Ekosistem Pendidikan Jarak Jauh (Studi Kasus: Universitas Terbuka)  
+**Mata Kuliah:** STSI4401 CAPSTONE PROJECT — Universitas Terbuka (2026)  
 
 ---
 
-## 🎯 Milestones (Fase Rilis)
+## 📝 Backlog (Fase Mendatang)
+- [ ] **Modul WebRTC (Tahap Opsional)**: Implementasi signaling server di ElysiaJS untuk panggilan darurat intervensi krisis.
+- [ ] **Modul WebRTC (Tahap Opsional)**: Implementasi P2P Video/Voice Call di klien dengan persetujuan eksplisit (*consent*).
+- [ ] **Audit Performa PWA Akhir**: Konfigurasi Workbox Service Worker, offline fallback, dan audit Google Lighthouse PWA skor > 90.
 
-### Fase 1: Fondasi, Auth, & Pra-Konseling Engine
-Fokus pada infrastruktur monorepo, database PostgreSQL, Google OAuth 2.0 (one-way hashing), dan mesin kalkulasi matematika DASS-21 & VAK.
+## 📌 To Do (Sprint Saat Ini — Prototyping Construction)
+- [ ] **Setup Frontend PWA (`apps/web`)**: Inisialisasi Vite + React.js, Tailwind CSS v4, konfigurasi palet warna psikologis (Soft Sage Green & Slate Blue).
+- [ ] **Routing & Arsitektur Halaman Klien**: Setup TanStack Router (Halaman Login Google, Dashboard Anonim, Wizard Asesmen, Chatroom).
+- [ ] **Komponen UI Empatik (Shadcn UI)**: Implementasi *Pill Icebreakers*, *expanding textarea*, modal dialog konfirmasi tiket, dan safe exit button.
+- [ ] **Instrumen Pengujian Evaluasi Bab 3**: Penyiapan lembar uji *Black-Box Testing* dan kuesioner *System Usability Scale (SUS)* 10 butir pertanyaan skala Likert.
 
-### Fase 2: Mood Tracker AI & Antarmuka Empatik
-Fokus pada analisis sentimen curhatan teks bebas harian via LLM untuk afirmasi empati, Pill Icebreakers, dan expanding textarea.
+## 🏃 In Progress (Sedang Berjalan)
+- [ ] **Inisialisasi Frontend PWA (`apps/web`)**: Setup React Vite monorepo dengan token warna psikologis.
 
-### Fase 3: Core Chat & E2EE
-Implementasi Web Crypto API (RSA Key Pair), WebSocket ElysiaJS untuk obrolan real-time, dan UI Chatbox (Pill Icebreakers).
+## 🔍 In Review (Pengujian & Verifikasi)
+- [x] **Validitas Formula Matematis DASS-21**: Lovibond & Lovibond (Normal, Mild, Moderate, Severe, Extremely Severe) terverifikasi 100% via unit test (TDD pass).
+- [x] **Akurasi Modalitas Belajar VAK**: Format 12 & 30 butir terverifikasi deterministik via unit test (TDD pass).
+- [x] **Penegakan RBAC Lapis Ganda**: HTTP 403 Forbidden untuk akses ilegal mahasiswa ke antrean konselor terverifikasi via test.
+- [x] **Kesesuaian Kajian Metodologi Bab 3**: Formulasi R&D, Prototyping, dan pemisahan data fungsional vs data SUS terverifikasi selaras dengan proposal.
 
-### Fase 4: PWA Polish & WebRTC (Opsional)
-Optimalisasi PWA (Lighthouse Audit) dan penambahan fitur panggilan darurat (P2P WebRTC).
+## ✅ Done (Selesai)
+- [x] **Requirement Gathering & Proposal Alignment**: Penyelarasan PRD dengan proposal resmi Capstone STSI4401 Universitas Terbuka.
+- [x] **Kajian Metodologi Bab III & Teori Desain**: Penyusunan dokumen kajian metodologi R&D, model Prototyping, instrumen SUS, dan psikologi warna di `docs/Bab3_Metodologi_dan_Teori_Desain.md`.
+- [x] **Riset Instrumen Baku DASS-21 & VAK**: Pendokumentasian resmi 21 butir DASS-21 dan format kuesioner VAK di `docs/Instrumen_Baku_DASS21_dan_VAK.md`.
+- [x] **Visualisasi Diagram Mermaid & Ekspor PNG**: Pembangunan dashboard interaktif mandiri di `docs/flowchart_dashboard.html` dengan fitur download PNG resolusi tinggi untuk laporan Bab 3 & 4.
+- [x] **Architectural Decision Records (ADR)**: Kajian akademis (ADR-001 s.d. ADR-006) terdokumentasi di `docs/ADR_Kajian_Keputusan_Arsitektur.md`.
+- [x] **Inisiasi Monorepo (Tahap 0)**: Setup Monorepo Bun Workspaces, Biome linter, Git rules, dan konfigurasi Typecheck.
+- [x] **Kernel Bersama (Tahap 1)**: Implementasi `@safespace/shared` (Strict types, Zod schemas, one-way crypto hash, pseudonym generator, formula DASS-21, formula VAK) dengan 100% unit test passing.
+- [x] **Skema Database & Migrasi (Tahap 2)**: Implementasi `@safespace/db` Drizzle ORM PostgreSQL (`users_auth`, `counselors_profile`, `counseling_sessions`, `messages`, kolom JSONB `vak_result` dan `dass21_score`, role `admin`).
+- [x] **Backend Auth RBAC (Tahap 3)**: Setup ElysiaJS (`apps/api`), Swagger UI, CORS, JWT session, Google OAuth sanitization, dan RBAC middleware.
+- [x] **Backend Assessment HTTP Route**: Implementasi endpoint DASS-21, VAK, dan Mood Tracker di `apps/api/src/modules/assessment/assessment.route.ts` dengan TDD (6/6 test pass).
+- [x] **Backend Counseling Sessions & Helpdesk Ticket**: Implementasi repository terisolasi (Double-Blind scoping), service, dan route tiket pra-konseling di `apps/api/src/modules/session/` dengan proteksi RBAC 403 (9/9 test pass).
+
+---
+
+## 🎯 Siklus Rilis (Sesuai Model Prototyping)
+
+### Siklus 1: Requirements & Architectural Modeling (SELESAI ✅)
+Fondasi monorepo, database PostgreSQL, sanitasi identitas Google OAuth 2.0, formula DASS-21 & VAK murni, dan perumusan metodologi Bab 3.
+
+### Siklus 2: Quick Design & Visual Modeling (AKTIF 🔄)
+Penyusunan diagram alur sistem, dashboard visualisasi diagram laporan, penetapan palet warna empati, dan persiapan komponen UI PWA.
+
+### Siklus 3: Prototype Construction & Helpdesk Ticketing (SELANJUTNYA 🔜)
+Inisialisasi `apps/web` (React + Tailwind v4 + TanStack Router), integrasi endpoint asesmen, dan alur pembuatan tiket pra-konseling terenkripsi.
+
+### Siklus 4: Realtime Chat, E2EE, & Evaluasi UAT (SUS)
+Implementasi Web Crypto API, WebSocket realtime chatroom, pelaksanaan Black-Box testing, dan pengujian UAT System Usability Scale dengan responden mahasiswa UT.

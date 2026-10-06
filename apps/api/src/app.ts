@@ -3,9 +3,14 @@ import { swagger } from '@elysiajs/swagger';
 import { createDatabaseConnection } from '@safespace/db';
 import { Elysia } from 'elysia';
 import { config } from './config/env';
+import { createAssessmentRoute } from './modules/assessment/assessment.route';
+import { AssessmentService } from './modules/assessment/assessment.service';
 import { AuthRepository } from './modules/auth/auth.repository';
 import { createAuthRoute } from './modules/auth/auth.route';
 import { AuthService } from './modules/auth/auth.service';
+import { SessionRepository } from './modules/session/session.repository';
+import { createSessionRoute } from './modules/session/session.route';
+import { SessionService } from './modules/session/session.service';
 
 export function createServerApp() {
   const { db } = createDatabaseConnection();
@@ -15,6 +20,9 @@ export function createServerApp() {
     config.identityPepperSecret,
     config.allowedEmailDomains,
   );
+  const assessmentService = new AssessmentService();
+  const sessionRepository = new SessionRepository(db);
+  const sessionService = new SessionService(sessionRepository);
 
   return new Elysia()
     .use(
@@ -48,6 +56,17 @@ export function createServerApp() {
     .use(
       createAuthRoute({
         authService,
+        jwtSecret: config.jwtSecret,
+      }),
+    )
+    .use(
+      createAssessmentRoute({
+        assessmentService,
+      }),
+    )
+    .use(
+      createSessionRoute({
+        sessionService,
         jwtSecret: config.jwtSecret,
       }),
     );
