@@ -11,19 +11,18 @@
 - [ ] **Audit Performa PWA Akhir**: Konfigurasi Workbox Service Worker, offline fallback, dan audit Google Lighthouse PWA skor > 90.
 
 ## 📌 To Do (Sprint Saat Ini — Prototyping Construction)
-- [ ] **Setup Frontend PWA (`apps/web`)**: Inisialisasi Vite + React.js, Tailwind CSS v4, konfigurasi palet warna psikologis (Soft Sage Green & Slate Blue).
-- [ ] **Routing & Arsitektur Halaman Klien**: Setup TanStack Router (Halaman Login Google, Dashboard Anonim, Wizard Asesmen, Chatroom).
-- [ ] **Komponen UI Empatik (Shadcn UI)**: Implementasi *Pill Icebreakers*, *expanding textarea*, modal dialog konfirmasi tiket, dan safe exit button.
+- [ ] **E2EE Web Crypto API & WebSocket Realtime**: Enkripsi kunci publik/privat RSA-OAEP & AES-GCM di chatroom client.
 - [ ] **Instrumen Pengujian Evaluasi Bab 3**: Penyiapan lembar uji *Black-Box Testing* dan kuesioner *System Usability Scale (SUS)* 10 butir pertanyaan skala Likert.
 
 ## 🏃 In Progress (Sedang Berjalan)
-- [ ] **Inisialisasi Frontend PWA (`apps/web`)**: Setup React Vite monorepo dengan token warna psikologis.
+- [ ] **Persiapan Pengujian Black-Box & Instrumen UAT (SUS)**: Matriks pengujian fungsional dan instrumen SUS untuk evaluasi Bab 3 & 4.
 
 ## 🔍 In Review (Pengujian & Verifikasi)
 - [x] **Validitas Formula Matematis DASS-21**: Lovibond & Lovibond (Normal, Mild, Moderate, Severe, Extremely Severe) terverifikasi 100% via unit test (TDD pass).
 - [x] **Akurasi Modalitas Belajar VAK**: Format 12 & 30 butir terverifikasi deterministik via unit test (TDD pass).
 - [x] **Penegakan RBAC Lapis Ganda**: HTTP 403 Forbidden untuk akses ilegal mahasiswa ke antrean konselor terverifikasi via test.
 - [x] **Kesesuaian Kajian Metodologi Bab 3**: Formulasi R&D, Prototyping, dan pemisahan data fungsional vs data SUS terverifikasi selaras dengan proposal.
+- [x] **PWA Build & Service Worker**: Bundle klien Vite + React + Tailwind v4 + Workbox PWA terverifikasi 100% lulus build & audit tipe.
 
 ## ✅ Done (Selesai)
 - [x] **Requirement Gathering & Proposal Alignment**: Penyelarasan PRD dengan proposal resmi Capstone STSI4401 Universitas Terbuka.
@@ -37,6 +36,8 @@
 - [x] **Backend Auth RBAC (Tahap 3)**: Setup ElysiaJS (`apps/api`), Swagger UI, CORS, JWT session, Google OAuth sanitization, dan RBAC middleware.
 - [x] **Backend Assessment HTTP Route**: Implementasi endpoint DASS-21, VAK, dan Mood Tracker di `apps/api/src/modules/assessment/assessment.route.ts` dengan TDD (6/6 test pass).
 - [x] **Backend Counseling Sessions & Helpdesk Ticket**: Implementasi repository terisolasi (Double-Blind scoping), service, dan route tiket pra-konseling di `apps/api/src/modules/session/` dengan proteksi RBAC 403 (9/9 test pass).
+- [x] **Inisialisasi Frontend PWA (`apps/web`)**: Setup React 19 + Vite 6 + Tailwind CSS v4, konfigurasi palet warna psikologis (Soft Sage Green `#4A7C59`, Slate Blue `#3B5998`, Warm Ivory `#F9F9F6`), dan PWA manifest/service worker.
+- [x] **Komponen UI Empatik & Wizard Asesmen**: Implementasi *Dass21Wizard* (21 butir chunking kartu bertahap), *VakWizard* (12 butir skenario adaptif), *MoodJournalBox* (expanding textarea & pill icebreakers), *StudentDashboard*, *CounselorQueue*, *ChatRoom*, dan *SafeExitButton*.
 
 ---
 
@@ -45,11 +46,11 @@
 ### Siklus 1: Requirements & Architectural Modeling (SELESAI ✅)
 Fondasi monorepo, database PostgreSQL, sanitasi identitas Google OAuth 2.0, formula DASS-21 & VAK murni, dan perumusan metodologi Bab 3.
 
-### Siklus 2: Quick Design & Visual Modeling (AKTIF 🔄)
+### Siklus 2: Quick Design & Visual Modeling (SELESAI ✅)
 Penyusunan diagram alur sistem, dashboard visualisasi diagram laporan, penetapan palet warna empati, dan persiapan komponen UI PWA.
 
-### Siklus 3: Prototype Construction & Helpdesk Ticketing (SELANJUTNYA 🔜)
-Inisialisasi `apps/web` (React + Tailwind v4 + TanStack Router), integrasi endpoint asesmen, dan alur pembuatan tiket pra-konseling terenkripsi.
+### Siklus 3: Prototype Construction & Helpdesk Ticketing (SELESAI ✅)
+Inisialisasi `apps/web` (React + Tailwind v4 + PWA), integrasi endpoint asesmen DASS-21 & VAK, dan alur pembuatan tiket pra-konseling terenkripsi dengan profil terlampir (*attached profiles*).
 
-### Siklus 4: Realtime Chat, E2EE, & Evaluasi UAT (SUS)
+### Siklus 4: Realtime Chat, E2EE, & Evaluasi UAT (SUS) (AKTIF 🔄)
 Implementasi Web Crypto API, WebSocket realtime chatroom, pelaksanaan Black-Box testing, dan pengujian UAT System Usability Scale dengan responden mahasiswa UT.
