@@ -13,7 +13,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'safespace-logo.svg'],
       manifest: {
-        name: 'SafeSpace PWA — Pra-Konseling Anonim UT',
+        name: 'SafeSpace PWA: Pra-Konseling Anonim',
         short_name: 'SafeSpace',
         description:
           'Sistem Informasi Pra-Konseling Anonim dan Pemetaan Potensi Diri untuk Deteksi Dini Academic Burnout pada Ekosistem PJJ',
@@ -41,6 +41,8 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
+  envDir: path.resolve(import.meta.dirname, '../../'),
+  envPrefix: ['VITE_', 'GOOGLE_'],
   server: {
     port: 5173,
     proxy: {

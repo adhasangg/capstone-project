@@ -11,13 +11,15 @@
 
 ## Daftar Isi
 1. [Pendahuluan & Konteks Sistem](#1-pendahuluan--konteks-sistem)
-2. [ADR-001: Mekanisme Autentikasi — Migrasi ke Google OAuth 2.0 dengan Hashing Anonim](#2-adr-001-mekanisme-autentikasi--migrasi-ke-google-oauth-20-dengan-hashing-anonim)
-3. [ADR-002: Pemilihan Basis Data — PostgreSQL dengan Drizzle ORM](#3-adr-002-pemilihan-basis-data--postgresql-dengan-drizzle-orm)
-4. [ADR-003: Arsitektur Realtime — ElysiaJS Native WebSocket & WebRTC P2P](#4-adr-003-arsitektur-realtime--elysiajs-native-websocket--webrtc-p2p)
-5. [ADR-004: Standardisasi Rekayasa Perangkat Lunak — Bun Monorepo, Biome, TDD, & GitNexus](#5-adr-004-standardisasi-rekayasa-perangkat-lunak--bun-monorepo-biome-tdd--gitnexus)
+2. [ADR-001: Mekanisme Autentikasi  -  Migrasi ke Google OAuth 2.0 dengan Hashing Anonim](#2-adr-001-mekanisme-autentikasi--migrasi-ke-google-oauth-20-dengan-hashing-anonim)
+3. [ADR-002: Pemilihan Basis Data  -  PostgreSQL dengan Drizzle ORM](#3-adr-002-pemilihan-basis-data--postgresql-dengan-drizzle-orm)
+4. [ADR-003: Arsitektur Realtime  -  ElysiaJS Native WebSocket & WebRTC P2P](#4-adr-003-arsitektur-realtime--elysiajs-native-websocket--webrtc-p2p)
+5. [ADR-004: Standardisasi Rekayasa Perangkat Lunak  -  Bun Monorepo, Biome, TDD, & GitNexus](#5-adr-004-standardisasi-rekayasa-perangkat-lunak--bun-monorepo-biome-tdd--gitnexus)
 6. [ADR-005: Instrumen Psikometrik Baku (DASS-21 & VAK) dengan Formula Matematis vs Diagnostik LLM](#6-adr-005-instrumen-psikometrik-baku-dass-21--vak-dengan-formula-matematis-vs-diagnostik-llm)
 7. [ADR-006: Pertahanan Keamanan Berlapis (Two-Way Double-Blind & Defense-in-Depth RBAC)](#7-adr-006-pertahanan-keamanan-berlapis-two-way-double-blind--defense-in-depth-rbac)
-8. [Matriks Ringkasan Keputusan](#8-matriks-ringkasan-keputusan)
+8. [ADR-007: Unlinkable Ephemeral Pseudonymity & Counselor Handled Log Architecture](#8-adr-007-unlinkable-ephemeral-pseudonymity--counselor-handled-log-architecture)
+9. [Matriks Ringkasan Keputusan](#9-matriks-ringkasan-keputusan)
+
 
 ---
 
@@ -31,7 +33,7 @@ Untuk memenuhi standar karya ilmiah yang dapat dipertanggungjawabkan, setiap kep
 
 ---
 
-## 2. ADR-001: Mekanisme Autentikasi — Migrasi ke Google OAuth 2.0 dengan Hashing Anonim
+## 2. ADR-001: Mekanisme Autentikasi  -  Migrasi ke Google OAuth 2.0 dengan Hashing Anonim
 
 ### 2.1. Konteks Masalah
 Rancangan awal sistem menggunakan autentikasi berbasis kode OTP (One-Time Password) yang dikirimkan ke email institusi (`@ecampus.ut.ac.id`). Dalam kajian kelayakan implementasi, ditemukan beberapa kendala kritis:
@@ -54,21 +56,21 @@ Dipilih **Google OAuth 2.0 (Opsi C)** dengan mekanisme sanitasi identitas instan
 
 ```
 [Pengguna] 
-    │ Login via Google (email @ecampus.ut.ac.id / umum)
-    ▼
-[Google Identity Provider] ──(ID Token)──► [ElysiaJS Backend]
-                                                │
-       ┌────────────────────────────────────────┴────────────────────────────────────────┐
-       │ 1. Validasi Domain (Whitelist: ecampus.ut.ac.id atau * sesuai konfigurasi)      │
-       │ 2. Ekstrak 'sub' (Google Unique Subject Identifier)                             │
-       │ 3. Hashing Kriptografis Satu Arah: SHA-256(sub + PEPPER_SECRET)                │
-       │ 4. BUANG data nama asli, foto profil, dan email teks biasa dari memori          │
-       │ 5. Cari / Buat Record di `users_auth`:                                         │
-       │    - id: UUIDv7                                                                 │
-       │    - hashed_identity: SHA-256 ciphertext                                        │
-       │    - role: 'student' | 'counselor'                                              │
-       │ 6. Terbitkan Sesi JWT Anonim (Payload: userId: UUID, pseudonym: "Mahasiswa #X") │
-       └─────────────────────────────────────────────────────────────────────────────────┘
+    â”‚ Login via Google (email @ecampus.ut.ac.id / umum)
+    â–¼
+[Google Identity Provider] â”€â”€(ID Token)â”€â”€â–º [ElysiaJS Backend]
+                                                â”‚
+       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+       â”‚ 1. Validasi Domain (Whitelist: ecampus.ut.ac.id atau * sesuai konfigurasi)      â”‚
+       â”‚ 2. Ekstrak 'sub' (Google Unique Subject Identifier)                             â”‚
+       â”‚ 3. Hashing Kriptografis Satu Arah: SHA-256(sub + PEPPER_SECRET)                â”‚
+       â”‚ 4. BUANG data nama asli, foto profil, dan email teks biasa dari memori          â”‚
+       â”‚ 5. Cari / Buat Record di `users_auth`:                                         â”‚
+       â”‚    - id: UUIDv7                                                                 â”‚
+       â”‚    - hashed_identity: SHA-256 ciphertext                                        â”‚
+       â”‚    - role: 'student' | 'counselor'                                              â”‚
+       â”‚ 6. Terbitkan Sesi JWT Anonim (Payload: userId: UUID, pseudonym: "Mahasiswa #X") â”‚
+       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 2.4. Konsekuensi
@@ -77,7 +79,7 @@ Dipilih **Google OAuth 2.0 (Opsi C)** dengan mekanisme sanitasi identitas instan
 
 ---
 
-## 3. ADR-002: Pemilihan Basis Data — PostgreSQL dengan Drizzle ORM
+## 3. ADR-002: Pemilihan Basis Data  -  PostgreSQL dengan Drizzle ORM
 
 ### 3.1. Konteks Masalah
 Sistem mengelola komunikasi realtime (chat interaktif), pertukaran sinyal WebRTC, serta riwayat pesan terenkripsi (E2EE). Diperlukan basis data yang tangguh dalam hal integritas data, mendukung kriptografi identitas, memiliki latensi rendah, dan ramah terhadap arsitektur monorepo TypeScript.
@@ -104,7 +106,7 @@ Dipilih **PostgreSQL** yang dikelola melalui **Drizzle ORM**.
 
 ---
 
-## 4. ADR-003: Arsitektur Realtime — ElysiaJS Native WebSocket & WebRTC P2P
+## 4. ADR-003: Arsitektur Realtime  -  ElysiaJS Native WebSocket & WebRTC P2P
 
 ### 4.1. Konteks Masalah
 Sistem membutuhkan transmisi pesan instan (<200ms) untuk chat teks serta kemampuan eskalasi ke panggilan suara/video jika pengguna membutuhkan intervensi darurat.
@@ -113,28 +115,28 @@ Sistem membutuhkan transmisi pesan instan (<200ms) untuk chat teks serta kemampu
 Diterapkan pemisahan tanggung jawab yang jelas (*Separation of Concerns*):
 
 ```
-                  ┌──────────────────────────────────────────────┐
-                  │              PERAMBAN KLIEN                  │
-                  │  - Enkripsi Pesan Web Crypto (RSA/AES)       │
-                  │  - Inisiasi RTCPeerConnection (Media P2P)    │
-                  └──────────────┬────────────────┬──────────────┘
-                                 │                │
-                     Media Stream (Audio/Video)   │ WebSocket (Chat & Signaling)
-                     Peer-to-Peer murni           │
-                                 ▼                ▼
-                  ┌────────────────────────┐   ┌──────────────────────────────────┐
-                  │    KLIEN LAWAN BICARA  │   │     ELYSIANJS NATIVE WEBSOCKET   │
-                  │    (Konselor / Pasien) │   │  (Kernel Bun uWebSocket C++)     │
-                  └────────────────────────┘   │  - Topic Pub/Sub in-memory       │
-                                               │  - Relay SDP & ICE Candidate     │
-                                               └──────────────┬───────────────────┘
-                                                              │
+                  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                  â”‚              PERAMBAN KLIEN                  â”‚
+                  â”‚  - Enkripsi Pesan Web Crypto (RSA/AES)       â”‚
+                  â”‚  - Inisiasi RTCPeerConnection (Media P2P)    â”‚
+                  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                 â”‚                â”‚
+                     Media Stream (Audio/Video)   â”‚ WebSocket (Chat & Signaling)
+                     Peer-to-Peer murni           â”‚
+                                 â–¼                â–¼
+                  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                  â”‚    KLIEN LAWAN BICARA  â”‚   â”‚     ELYSIANJS NATIVE WEBSOCKET   â”‚
+                  â”‚    (Konselor / Pasien) â”‚   â”‚  (Kernel Bun uWebSocket C++)     â”‚
+                  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚  - Topic Pub/Sub in-memory       â”‚
+                                               â”‚  - Relay SDP & ICE Candidate     â”‚
+                                               â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                                              â”‚
                                             Simpan Pesan Ciphertext Terenkripsi
-                                                              ▼
-                                               ┌──────────────────────────────────┐
-                                               │     POSTGRESQL PERSISTENCE       │
-                                               │  (Hanya menyimpan ciphertext)    │
-                                               └──────────────────────────────────┘
+                                                              â–¼
+                                               â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                                               â”‚     POSTGRESQL PERSISTENCE       â”‚
+                                               â”‚  (Hanya menyimpan ciphertext)    â”‚
+                                               â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 1. **Jalur Teks Chat**:
@@ -147,7 +149,7 @@ Diterapkan pemisahan tanggung jawab yang jelas (*Separation of Concerns*):
 
 ---
 
-## 5. ADR-004: Standardisasi Rekayasa Perangkat Lunak — Bun Monorepo, Biome, TDD, & GitNexus
+## 5. ADR-004: Standardisasi Rekayasa Perangkat Lunak  -  Bun Monorepo, Biome, TDD, & GitNexus
 
 ### 5.1. Bun Workspaces (Monorepo)
 - **Keputusan**: Menggabungkan `apps/api`, `apps/web`, dan `packages/shared` dalam satu repositori Bun.
@@ -176,7 +178,7 @@ Rancangan awal mengandalkan Large Language Model (LLM) untuk menentukan tingkat 
 
 ### 6.2. Keputusan Arsitektur
 1. **Penerapan Instrumen Baku DASS-21 (Lovibond & Lovibond, 1995)**:
-   - Pengukuran tingkat *Depression*, *Anxiety*, dan *Stress* menggunakan 21 butir pernyataan baku (skala Likert 0–3).
+   - Pengukuran tingkat *Depression*, *Anxiety*, dan *Stress* menggunakan 21 butir pernyataan baku (skala Likert 0â€“3).
    - Perhitungan dilakukan murni secara **deterministik matematis**:
      $$\text{Score} = \left( \sum_{i \in \text{Subscale}} \text{Item}_i \right) \times 2$$
    - Skor diklasifikasikan ke dalam 5 tingkatan baku: *Normal*, *Mild*, *Moderate*, *Severe*, dan *Extremely Severe*.
@@ -206,26 +208,26 @@ Diterapkan arsitektur keamanan lapis ganda (*Defense-in-Depth*):
 
 ```
                                   PERMINTAAN KLIEN
-                                         │
-                                         ▼
-                   ┌───────────────────────────────────────────┐
-                   │        LAPISAN 1: API MIDDLEWARE          │
-                   │           (ElysiaJS Router Guard)         │
-                   │  - Verifikasi Sesi JWT                    │
-                   │  - Cek Role: Mahasiswa vs Konselor        │
-                   │  - Jika role = student akses antrean      │
-                   │    konselor ──► TOLAK (403 Forbidden)     │
-                   └─────────────────────┬─────────────────────┘
-                                         │ (Lolos Validasi)
-                                         ▼
-                   ┌───────────────────────────────────────────┐
-                   │        LAPISAN 2: DATABASE SCOPING        │
-                   │             (Drizzle ORM Layer)           │
-                   │  - Query konselor diisolasi               │
-                   │  - DILARANG JOIN ke tabel `users_auth`    │
-                   │  - Hanya menarik `counseling_sessions`    │
-                   │    dengan lampiran `dass21_score` (JSONB) │
-                   └───────────────────────────────────────────┘
+                                         â”‚
+                                         â–¼
+                   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                   â”‚        LAPISAN 1: API MIDDLEWARE          â”‚
+                   â”‚           (ElysiaJS Router Guard)         â”‚
+                   â”‚  - Verifikasi Sesi JWT                    â”‚
+                   â”‚  - Cek Role: Mahasiswa vs Konselor        â”‚
+                   â”‚  - Jika role = student akses antrean      â”‚
+                   â”‚    konselor â”€â”€â–º TOLAK (403 Forbidden)     â”‚
+                   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                         â”‚ (Lolos Validasi)
+                                         â–¼
+                   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                   â”‚        LAPISAN 2: DATABASE SCOPING        â”‚
+                   â”‚             (Drizzle ORM Layer)           â”‚
+                   â”‚  - Query konselor diisolasi               â”‚
+                   â”‚  - DILARANG JOIN ke tabel `users_auth`    â”‚
+                   â”‚  - Hanya menarik `counseling_sessions`    â”‚
+                   â”‚    dengan lampiran `dass21_score` (JSONB) â”‚
+                   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 1. **Two-Way Double-Blind**:
@@ -237,7 +239,34 @@ Diterapkan arsitektur keamanan lapis ganda (*Defense-in-Depth*):
 
 ---
 
-## 8. Matriks Ringkasan Keputusan
+## 8. ADR-007: Unlinkable Ephemeral Pseudonymity & Counselor Handled Log Architecture
+
+### 8.1. Konteks Masalah
+Pada desain awal, pseudonim mahasiswa diterbitkan satu kali saat pendaftaran akun (misalnya `Mahasiswa #4021`) dan digunakan terus menerus untuk setiap tiket konseling di masa depan (*Persistent Pseudonym*). Dalam kajian evaluasi privasi tingkat lanjut, ditemukan dua risiko kritis:
+1. **Risiko De-anonimisasi Berkelanjutan (*Linkability & Stylometry Profiling*)**: Konselor dapat menghubungkan potongan informasi, gaya bahasa, atau jam konsultasi dari berbagai tiket yang memiliki pseudonim sama untuk menebak identitas mahasiswa (Pfitzmann & Hansen, 2010).
+2. **Kekhawatiran Stigma & Keengganan Curhat Ulang**: Mahasiswa yang pernah berkonsultasi mengenai masalah berat merasa enggan membuka tiket baru karena takut dinilai buruk oleh konselor di sesi berikutnya (*Fear of Evaluation*, Suler, 2004).
+
+### 8.2. Keputusan Arsitektur
+Diterapkan mekanisme **Unlinkable Ephemeral Pseudonymity** (Pseudonim Dinamis Sekali Pakai per Sesi) dan pemisahan arsitektur antarmuka:
+
+1. **Per-Session Ephemeral Pseudonym (Unlinkability Garansi)**:
+   - Setiap kali mahasiswa membuat tiket baru via `POST /api/sessions/create`, sistem otomatis menerbitkan nama samaran sesi yang independen (misalnya: `Sahabat Lentera-42`, `Sahabat Samudera-88`).
+   - Konselor hanya melihat `studentPseudonym` pada tiket tersebut. Konselor tidak dapat mengetahui apakah dua tiket berbeda berasal dari mahasiswa yang sama (*Unlinkability by Design*, Cavoukian, 2010).
+2. **Sanitasi Tampilan Navbar Mahasiswa**:
+   - Di navbar mahasiswa, label identitas diubah menjadi representasi akun privat: `Akun Mahasiswa [Mahasiswa PJJ]`, menghilangkan kontradiksi nama dengan kartu tiket.
+   - Nama samaran sesi hanya ditampilkan secara eksplisit pada masing-masing kartu tiket dan ruang obrolan sesi bersangkutan.
+3. **Riwayat Pendampingan Konselor (*Counselor Handled History*)**:
+   - Staf konselor disediakan tab `Riwayat Pendampingan Saya` via endpoint `GET /api/sessions/counselor/history`.
+   - Konselor dapat meninjau log tiket yang pernah atau sedang mereka tangani secara resmi sebagai portofolio bimbingan tanpa membuka identitas personal mahasiswa.
+
+### 8.3. Landasan Teoretis & Referensi Akademis
+- **Pfitzmann, A., & Hansen, M. (2010)**: *Anonymity, Unlinkability, Undetectability, Unobservability, Pseudonymity, and Identity Management - A Consolidated Proposal for Terminology*. Standar W3C & ISO/IEC 27563 mengenai klasifikasi *Transaction Pseudonyms* vs *Persistent Pseudonyms*.
+- **Cavoukian, A. (2010)**: *Privacy by Design: The 7 Foundational Principles*. Penerapan prinsip *Data Minimization* dan *Full Functionality (Zero-Sum to Positive-Sum)*.
+- **Suler, J. (2004)**: *The Online Disinhibition Effect*. CyberPsychology & Behavior, 7(3), 321-326.
+
+---
+
+## 9. Matriks Ringkasan Keputusan
 
 | Dimensi | Desain Awal | Desain Mutakhir (ADR) | Justifikasi Akademis |
 |---|---|---|---|
@@ -246,8 +275,11 @@ Diterapkan arsitektur keamanan lapis ganda (*Defense-in-Depth*):
 | **Pemetaan Diri** | Diagnostik Bebas LLM | **Instrumen Baku DASS-21 & VAK (Matematika Murni)** | Menghindari halusinasi klinis AI, validitas psikometrik teruji secara internasional. |
 | **Peran AI (LLM)** | Menilai Tingkat Stres | **Empathetic Mood Tracker** | Murni membaca sentimen narasi curhatan bebas dan memberi afirmasi empati rujukan. |
 | **Basis Data** | MariaDB / PostgreSQL | **PostgreSQL** + Drizzle ORM (JSONB Lampiran Profil) | Menyimpan profil DASS-21/VAK langsung terlampir di tiket tanpa konselor bertanya dari nol. |
+| **Anonimitas Sesi** | Pseudonim Statis Akun | **Unlinkable Ephemeral Pseudonymity** (Berganti Tiap Tiket) | Mencegah profiling lintas sesi (Pfitzmann & Hansen, 2010; Cavoukian, 2010). |
 | **Anonimitas Obrolan** | Satu Arah (Mahasiswa saja) | **Two-Way Double-Blind** (Mahasiswa & Konselor) | Mencegah bias pemilihan konselor dan melindungi staf dari potensi penargetan identitas. |
+| **Audit Konselor** | Hanya antrean triage | **Riwayat Pendampingan Saya** (Dedicated Counselor Log) | Konselor memiliki rekapitulasi portofolio bimbingan resmi tanpa merusak privasi mahasiswa. |
 | **Kanal Realtime** | WebSocket konvensional | ElysiaJS Bun Native WebSocket + WebRTC P2P | Throughput mikrodetik di memory server dan streaming media bebas beban server. |
 | **Kualitas Kode** | ESLint + Prettier | **Biome** (Zero-Any, Zero-Unknown) + TDD | Menjamin integritas tipe data dan keandalan logika algoritma kriptografi/skor. |
 | **Indeks Repositori** | Manual | **GitNexus** (Knowledge Graph Code Indexing) | Menjaga keterlacakan graf dependensi monorepo. |
+
 

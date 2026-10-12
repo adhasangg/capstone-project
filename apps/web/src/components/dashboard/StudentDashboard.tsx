@@ -121,7 +121,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             Pusat Kendali Kesehatan Mental & Gaya Belajar PJJ
           </span>
           <h1 className="text-2xl sm:text-3xl font-bold mt-1 text-white">
-            Selamat Datang, {session.user.pseudonym}
+            Selamat Datang di SafeSpace PWA
           </h1>
           <p className="text-xs sm:text-sm text-slate-100 max-w-xl mt-1 leading-relaxed">
             Sistem memadukan diagnosis emosional DASS-21 dengan modalitas belajar VAK untuk
@@ -312,13 +312,15 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </div>
 
                 <div className="p-3 bg-[#F0F4F8] rounded-xl border border-[#D9E2EC] text-xs text-[#24365D]">
-                  <strong className="block mb-1">Tips Adaptif untuk Mahasiswa UT:</strong>
+                  <strong className="block mb-1">
+                    Tips Adaptif untuk Pembelajaran Mandiri PJJ:
+                  </strong>
                   {vakResult.dominantStyle === 'visual' &&
-                    'Gunakan teknik Mind Mapping dan stabilo saat membaca Buku Materi Pokok (BMP) digital di ruang baca virtual.'}
+                    'Gunakan teknik Mind Mapping dan stabilo saat membaca modul dan materi digital di ruang baca online.'}
                   {vakResult.dominantStyle === 'auditory' &&
-                    'Aktifkan rekaman suara tutorial webinar (Tuweb) dan dengarkan ulang saat perjalanan komuter kerja.'}
+                    'Aktifkan rekaman audio/webinar kuliah dan dengarkan ulang saat perjalanan komuter kerja.'}
                   {vakResult.dominantStyle === 'kinesthetic' &&
-                    'Terapkan metode Pomodoro 25 menit diselingi peregangan fisik agar terhindar dari kelesuan saat diskusi tuton.'}
+                    'Terapkan metode Pomodoro 25 menit diselingi peregangan fisik agar terhindar dari kelesuan saat belajar mandiri.'}
                   {vakResult.dominantStyle === 'multimodal' &&
                     'Kombinasikan catatan visual dan pemutaran audio modul untuk materi dengan tingkat kompleksitas tinggi.'}
                 </div>
@@ -392,9 +394,12 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
               >
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-xs font-bold text-[#1E293B]">
                       Tiket #{item.id.slice(0, 8)}
+                    </span>
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-[#E3ECE5] text-[#31523A] border border-[#C7D9CC]">
+                      Samaran Sesi: <strong>{item.studentPseudonym}</strong>
                     </span>
                     {getStatusBadge(item.status)}
                   </div>

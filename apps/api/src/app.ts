@@ -7,7 +7,7 @@ import { createAssessmentRoute } from './modules/assessment/assessment.route';
 import { AssessmentService } from './modules/assessment/assessment.service';
 import { AuthRepository } from './modules/auth/auth.repository';
 import { createAuthRoute } from './modules/auth/auth.route';
-import { AuthService } from './modules/auth/auth.service';
+import { AuthService, defaultGoogleTokenVerifier } from './modules/auth/auth.service';
 import { ChatRepository } from './modules/chat/chat.repository';
 import { createChatRoute } from './modules/chat/chat.route';
 import { ChatService } from './modules/chat/chat.service';
@@ -16,18 +16,34 @@ import { createSessionRoute } from './modules/session/session.route';
 import { SessionService } from './modules/session/session.service';
 
 export function createServerApp() {
-  const { db } = createDatabaseConnection();
+  const { db, client } = createDatabaseConnection();
   const authRepository = new AuthRepository(db);
   const authService = new AuthService(
     authRepository,
     config.identityPepperSecret,
     config.allowedEmailDomains,
+    defaultGoogleTokenVerifier,
+    config.adminEmails,
+    config.counselorEmails,
   );
   const assessmentService = new AssessmentService();
   const sessionRepository = new SessionRepository(db);
   const sessionService = new SessionService(sessionRepository);
   const chatRepository = new ChatRepository(db);
   const chatService = new ChatService(chatRepository);
+
+  // Probe database non-blockingly to avoid 10s connection timeout stalls when offline
+  client`SELECT 1`
+    .then(() => {
+      authRepository.setDbAvailable(true);
+      sessionRepository.setDbAvailable(true);
+      chatRepository.setDbAvailable(true);
+    })
+    .catch(() => {
+      authRepository.setDbAvailable(false);
+      sessionRepository.setDbAvailable(false);
+      chatRepository.setDbAvailable(false);
+    });
 
   return new Elysia()
     .use(

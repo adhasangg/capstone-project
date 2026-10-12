@@ -97,7 +97,11 @@ export const api = {
   // Counseling Sessions / Helpdesk Tickets
   async createTicket(
     token: string,
-    payload: { dass21Result?: Dass21Result; vakResult?: VakResult },
+    payload: {
+      dass21Score?: Dass21Result;
+      dass21Result?: Dass21Result;
+      vakResult?: VakResult;
+    },
   ): Promise<CounselingSessionSummary> {
     const res = await fetch(`${BASE_URL}/sessions/create`, {
       method: 'POST',
@@ -105,7 +109,11 @@ export const api = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        dass21Score: payload.dass21Score ?? payload.dass21Result,
+        dass21Result: payload.dass21Result ?? payload.dass21Score,
+        vakResult: payload.vakResult,
+      }),
     });
     const json: ApiResponse<CounselingSessionSummary> = await res.json();
     if (!json.success) {
@@ -132,6 +140,17 @@ export const api = {
     const json: ApiResponse<CounselingSessionSummary[]> = await res.json();
     if (!json.success) {
       throw new Error(json.error.message || 'Gagal mengakses antrean konselor');
+    }
+    return json.data;
+  },
+
+  async getCounselorHistory(token: string): Promise<CounselingSessionSummary[]> {
+    const res = await fetch(`${BASE_URL}/sessions/counselor/history`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const json: ApiResponse<CounselingSessionSummary[]> = await res.json();
+    if (!json.success) {
+      throw new Error(json.error.message || 'Gagal memuat histori pendampingan konselor');
     }
     return json.data;
   },
@@ -212,6 +231,42 @@ export const api = {
     > = await res.json();
     if (!json.success) {
       throw new Error(json.error.message || 'Gagal memuat pesan');
+    }
+    return json.data;
+  },
+
+  // Admin / Sysadmin Management
+  async getAdminUsers(
+    token: string,
+  ): Promise<Array<{ id: string; role: UserRole; pseudonym: string; createdAt: string }>> {
+    const res = await fetch(`${BASE_URL}/auth/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const json: ApiResponse<
+      Array<{ id: string; role: UserRole; pseudonym: string; createdAt: string }>
+    > = await res.json();
+    if (!json.success) {
+      throw new Error(json.error.message || 'Gagal memuat daftar pengguna');
+    }
+    return json.data;
+  },
+
+  async updateUserRole(
+    token: string,
+    userId: string,
+    role: UserRole,
+  ): Promise<{ id: string; role: UserRole; pseudonym: string }> {
+    const res = await fetch(`${BASE_URL}/auth/users/${userId}/role`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ role }),
+    });
+    const json: ApiResponse<{ id: string; role: UserRole; pseudonym: string }> = await res.json();
+    if (!json.success) {
+      throw new Error(json.error.message || 'Gagal memperbarui peran pengguna');
     }
     return json.data;
   },

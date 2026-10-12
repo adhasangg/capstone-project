@@ -26,6 +26,7 @@ describe('Session Route Integration Tests (TDD & RBAC)', () => {
     getStudentSessions: mock().mockResolvedValue([sampleSession]),
     getWaitingQueue: mock().mockResolvedValue([sampleSession]),
     getSessionById: mock().mockResolvedValue(sampleSession),
+    getCounselorSessions: mock().mockResolvedValue([sampleSession]),
     assignCounselor: mock().mockResolvedValue({
       ...sampleSession,
       status: 'active',
@@ -135,4 +136,35 @@ describe('Session Route Integration Tests (TDD & RBAC)', () => {
       expect(data.data.status).toBe('active');
     });
   });
+
+  describe('GET /api/sessions/counselor/history', () => {
+    it('should allow counselor to view their own handled sessions history', async () => {
+      const token = await getCounselorToken();
+      const res = await app.handle(
+        new Request('http://localhost/api/sessions/counselor/history', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      );
+
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.success).toBe(true);
+      expect(Array.isArray(data.data)).toBe(true);
+      expect(data.data.length).toBe(1);
+    });
+
+    it('should reject student from accessing counselor history', async () => {
+      const token = await getStudentToken();
+      const res = await app.handle(
+        new Request('http://localhost/api/sessions/counselor/history', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      );
+
+      expect(res.status).toBe(403);
+    });
+  });
 });
+

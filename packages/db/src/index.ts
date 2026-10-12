@@ -32,7 +32,7 @@ export function createDatabaseConnection(config: DatabaseConfig = getDatabaseCon
     password: config.password,
     database: config.database,
     max: config.maxConnections,
-    connect_timeout: 10,
+    connect_timeout: Number(process.env.DB_CONNECT_TIMEOUT) || 2,
     idle_timeout: 30,
     onnotice: () => {},
   });

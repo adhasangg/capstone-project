@@ -283,34 +283,67 @@ export const Dass21Wizard: React.FC<Dass21WizardProps> = ({
       </div>
 
       {/* Trauma-Informed Question Card */}
-      <div className="min-h-[140px] flex items-center justify-center text-center p-6 bg-[#F9F9F6] rounded-xl border border-slate-100 mb-6">
-        <p className="text-base sm:text-lg font-medium text-[#1E293B] leading-relaxed">
-          "{DASS21_QUESTIONS[currentIndex]}"
-        </p>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#F4F6F3] to-[#F9F9F6] border border-[#DCE4DE] p-6 sm:p-7 mb-6 shadow-2xs">
+        <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-[#E2E8F0]">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#31523A] uppercase tracking-wider bg-[#E3ECE5] px-2.5 py-0.5 rounded-full border border-[#C7D9CC]">
+            Refleksi Kondisi 1 Minggu Terakhir
+          </span>
+          <span className="text-xs text-slate-400 font-mono font-medium">
+            Butir {currentIndex + 1} / 21
+          </span>
+        </div>
+        <div className="py-3 flex items-center justify-center min-h-[90px] text-center">
+          <p className="text-base sm:text-lg font-medium text-[#1E293B] leading-relaxed max-w-xl mx-auto">
+            "{DASS21_QUESTIONS[currentIndex]}"
+          </p>
+        </div>
       </div>
 
-      {/* Likert Scale Options */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-        {LIKERT_OPTIONS.map((opt) => (
-          <button
-            key={opt.score}
-            type="button"
-            onClick={() => handleSelectScore(opt.score)}
-            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-              currentAnswer === opt.score
-                ? 'border-[#4A7C59] bg-[#E3ECE5]/60 ring-2 ring-[#4A7C59]/20'
-                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/60'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-1">
-              <span className="font-semibold text-sm text-[#1E293B]">
-                {opt.score} — {opt.label}
-              </span>
-              {currentAnswer === opt.score && <CheckCircle2 className="w-4 h-4 text-[#4A7C59]" />}
-            </div>
-            <span className="text-xs text-slate-500 leading-tight">{opt.desc}</span>
-          </button>
-        ))}
+      {/* Likert Scale Options: Impeccable Tactile Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-6">
+        {LIKERT_OPTIONS.map((opt) => {
+          const isSelected = currentAnswer === opt.score;
+          return (
+            <button
+              key={opt.score}
+              type="button"
+              onClick={() => handleSelectScore(opt.score)}
+              className={`group relative p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex items-start gap-3.5 select-none ${
+                isSelected
+                  ? 'border-[#4A7C59] bg-[#F3F7F4] shadow-xs ring-2 ring-[#4A7C59]/20'
+                  : 'bg-white border-[#E2E8F0] hover:border-[#4A7C59]/50 hover:bg-[#FAFBF9] hover:shadow-2xs'
+              }`}
+            >
+              {/* Distinct Tactile Score Badge */}
+              <div
+                className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 transition-all duration-150 ${
+                  isSelected
+                    ? 'bg-[#4A7C59] text-white shadow-2xs scale-102'
+                    : 'bg-[#F4F6F3] text-[#334155] border border-[#E2E8F0] group-hover:border-[#4A7C59]/40 group-hover:bg-[#EBF3ED] group-hover:text-[#234B30]'
+                }`}
+              >
+                {opt.score}
+              </div>
+
+              {/* Text Hierarchy */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="font-semibold text-sm text-[#1E293B] tracking-tight">
+                    {opt.label}
+                  </span>
+                  {isSelected ? (
+                    <div className="w-5 h-5 rounded-full bg-[#EBF3ED] flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="w-4 h-4 text-[#4A7C59]" />
+                    </div>
+                  ) : (
+                    <div className="w-4 h-4 rounded-full border border-slate-300 shrink-0 group-hover:border-[#4A7C59]/50 transition-colors" />
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed font-normal">{opt.desc}</p>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {error && (

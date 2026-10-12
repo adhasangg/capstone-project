@@ -4,6 +4,7 @@ import {
   ArrowRight,
   BookOpen,
   CheckCircle2,
+  Eye,
   Headphones,
   Lightbulb,
   Move,
@@ -45,7 +46,7 @@ const VAK_SCENARIOS: VakScenario[] = [
     ],
   },
   {
-    scenario: 'Ketika mengingat informasi penting dari pertemuan tuton (tutorial online):',
+    scenario: 'Ketika mengingat informasi penting dari pertemuan tutorial daring:',
     options: [
       {
         modality: 'visual',
@@ -145,7 +146,7 @@ const VAK_SCENARIOS: VakScenario[] = [
     ],
   },
   {
-    scenario: 'Saat menjelaskan tugas yang rumit kepada rekan sekelompok tuton:',
+    scenario: 'Saat menjelaskan tugas yang rumit kepada rekan sekelompok diskusi online:',
     options: [
       {
         modality: 'visual',
@@ -208,7 +209,7 @@ const VAK_SCENARIOS: VakScenario[] = [
     ],
   },
   {
-    scenario: 'Saat mengikuti webinar atau sesi Tutorial Web (Tuweb):',
+    scenario: 'Saat mengikuti webinar atau sesi perkuliahan daring interaktif:',
     options: [
       {
         modality: 'visual',
@@ -228,17 +229,17 @@ const VAK_SCENARIOS: VakScenario[] = [
     ],
   },
   {
-    scenario: 'Format materi digital UT yang paling mempermudah saya menguasai konsep:',
+    scenario: 'Format materi pembelajaran digital yang paling mempermudah saya menguasai konsep:',
     options: [
       {
         modality: 'visual',
         label: 'E-Book & Infografis',
-        description: 'Buku Materi Pokok (BMP) digital dengan infografis dan navigasi rapi.',
+        description: 'Buku modul digital dengan infografis dan navigasi rapi.',
       },
       {
         modality: 'auditory',
         label: 'Audiobook & Podcast',
-        description: 'Rekaman audio pembahasan modul atau siaran radio edukasi UT.',
+        description: 'Rekaman audio pembahasan modul atau siaran podcast edukasi.',
       },
       {
         modality: 'kinesthetic',
@@ -456,37 +457,72 @@ export const VakWizard: React.FC<VakWizardProps> = ({ onComplete, token }) => {
         </div>
       </div>
 
-      {/* Scenario Box */}
-      <div className="p-5 bg-[#F0F4F8] rounded-xl border border-[#D9E2EC] mb-6">
-        <p className="text-sm sm:text-base font-semibold text-[#1E293B]">
-          {currentScenario.scenario}
-        </p>
+      {/* Scenario Box: Impeccable Calm Container */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#F0F4F8] to-[#F9FBFD] border border-[#D9E2EC] p-6 sm:p-7 mb-6 shadow-2xs">
+        <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-[#D9E2EC]">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#24365D] uppercase tracking-wider bg-[#D9E2EC] px-2.5 py-0.5 rounded-full border border-[#BCCCDC]">
+            Skenario Aktivitas Belajar
+          </span>
+          <span className="text-xs text-slate-400 font-mono font-medium">
+            Skenario {currentIndex + 1} / 12
+          </span>
+        </div>
+        <div className="py-2">
+          <p className="text-base sm:text-lg font-semibold text-[#1E293B] leading-relaxed">
+            {currentScenario.scenario}
+          </p>
+        </div>
       </div>
 
-      {/* Option Cards */}
+      {/* Option Cards: Impeccable Tactile Modality Cards */}
       <div className="space-y-3 mb-6">
-        {currentScenario.options.map((opt) => (
-          <button
-            key={opt.modality}
-            type="button"
-            onClick={() => handleSelectOption(opt.modality)}
-            className={`w-full p-4 rounded-xl border text-left transition-all cursor-pointer flex items-start justify-between gap-3 ${
-              currentAnswer === opt.modality
-                ? 'border-[#3B5998] bg-[#D9E2EC]/50 ring-2 ring-[#3B5998]/20'
-                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/60'
-            }`}
-          >
-            <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-0.5">
-                {opt.label}
+        {currentScenario.options.map((opt) => {
+          const isSelected = currentAnswer === opt.modality;
+          return (
+            <button
+              key={opt.modality}
+              type="button"
+              onClick={() => handleSelectOption(opt.modality)}
+              className={`group w-full p-4.5 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex items-start gap-4 select-none ${
+                isSelected
+                  ? 'border-[#3B5998] bg-[#F0F4F8] shadow-xs ring-2 ring-[#3B5998]/20'
+                  : 'bg-white border-[#E2E8F0] hover:border-[#3B5998]/50 hover:bg-[#FAFBF9] hover:shadow-2xs'
+              }`}
+            >
+              {/* Modality Icon Badge */}
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-150 ${
+                  isSelected
+                    ? 'bg-[#3B5998] text-white shadow-2xs scale-102'
+                    : 'bg-[#F4F6F9] text-slate-600 border border-[#E2E8F0] group-hover:border-[#3B5998]/40 group-hover:bg-[#EBF1F7] group-hover:text-[#24365D]'
+                }`}
+              >
+                {opt.modality === 'visual' && <Eye className="w-5 h-5" />}
+                {opt.modality === 'auditory' && <Headphones className="w-5 h-5" />}
+                {opt.modality === 'kinesthetic' && <Move className="w-5 h-5" />}
               </div>
-              <p className="text-sm text-[#1E293B] leading-relaxed">{opt.description}</p>
-            </div>
-            {currentAnswer === opt.modality && (
-              <CheckCircle2 className="w-5 h-5 text-[#3B5998] shrink-0 mt-0.5" />
-            )}
-          </button>
-        ))}
+
+              {/* Text Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="font-bold text-sm text-[#1E293B] tracking-tight">
+                    {opt.label}
+                  </span>
+                  {isSelected ? (
+                    <div className="w-5 h-5 rounded-full bg-[#D9E2EC] flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="w-4 h-4 text-[#3B5998]" />
+                    </div>
+                  ) : (
+                    <div className="w-4 h-4 rounded-full border border-slate-300 shrink-0 group-hover:border-[#3B5998]/50 transition-colors" />
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed font-normal">
+                  {opt.description}
+                </p>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {error && (

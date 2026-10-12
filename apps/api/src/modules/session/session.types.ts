@@ -22,6 +22,7 @@ export interface ISessionRepository {
   getStudentSessions(studentId: string): Promise<CounselingSessionSelect[]>;
   getWaitingQueue(): Promise<CounselingSessionSelect[]>;
   getSessionById(sessionId: string): Promise<CounselingSessionSelect | null>;
+  getCounselorSessions(counselorId: string): Promise<CounselingSessionSelect[]>;
   assignCounselor(sessionId: string, counselorId: string): Promise<CounselingSessionSelect>;
   closeSession(sessionId: string): Promise<CounselingSessionSelect>;
 }

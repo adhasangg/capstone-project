@@ -1,9 +1,9 @@
-# Instrumen Kuesioner System Usability Scale (SUS) & Panduan UAT
+﻿# Instrumen Kuesioner System Usability Scale (SUS) & Panduan UAT
 
-**Sistem:** SafeSpace PWA — Sistem Informasi Pra-Konseling Anonim dan Pemetaan Potensi Diri untuk Deteksi Dini Academic Burnout pada Ekosistem Pendidikan Jarak Jauh  
+**Sistem:** SafeSpace PWA  -  Sistem Informasi Pra-Konseling Anonim dan Pemetaan Potensi Diri untuk Deteksi Dini Academic Burnout pada Ekosistem Pendidikan Jarak Jauh  
 **Studi Kasus:** Universitas Terbuka (UT)  
 **Mata Kuliah:** STSI4401 Capstone Project (2026)  
-**Instrumen Evaluasi:** *System Usability Scale* (SUS) — 10 Butir Skala Likert (Brooke, 1996; Lewis, 2018)  
+**Instrumen Evaluasi:** *System Usability Scale* (SUS)  -  10 Butir Skala Likert (Brooke, 1996; Lewis, 2018)  
 
 ---
 
@@ -67,9 +67,9 @@ Berdasarkan skala empiris Bangor, Kortum, & Miller (2008) serta Lewis (2018):
 
 | Rentang Skor SUS | Derajat Kelayakan (*Acceptability*) | Skala Nilai (*Grade Scale*) | Kategori Penilaian Sifat (*Adjective Rating*) |
 | :---: | :---: | :---: | :---: |
-| **≥ 80.3** | **Acceptable (Sangat Layak)** | **Grade A** | **Excellent / Best Imaginable** |
-| **68.0 – 80.2** | **Acceptable (Layak)** | **Grade B / C** | **Good (Bagus)** |
-| **51.0 – 67.9** | **Marginal (Batas Toleransi)** | **Grade D** | **OK (Cukup / Perlu Perbaikan)** |
+| **â‰¥ 80.3** | **Acceptable (Sangat Layak)** | **Grade A** | **Excellent / Best Imaginable** |
+| **68.0 â€“ 80.2** | **Acceptable (Layak)** | **Grade B / C** | **Good (Bagus)** |
+| **51.0 â€“ 67.9** | **Marginal (Batas Toleransi)** | **Grade D** | **OK (Cukup / Perlu Perbaikan)** |
 | **< 51.0** | **Not Acceptable (Tidak Layak)** | **Grade F** | **Poor / Awful (Buruk)** |
 
 > [!IMPORTANT]

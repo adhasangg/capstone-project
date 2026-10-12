@@ -24,6 +24,8 @@ bun.lockb
 # Testing & Coverage
 coverage/
 .nyc_output/
+test-results/
+*.tsbuildinfo
 
 # IDE & Editor files
 .vscode/*

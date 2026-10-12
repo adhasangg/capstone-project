@@ -13,6 +13,24 @@ interface GoogleTokenInfoResponse {
  * Default production verifier calling Google TokenInfo API.
  */
 export async function defaultGoogleTokenVerifier(idToken: string): Promise<GoogleTokenPayload> {
+  // Support developer testing / sandbox token in non-production environments
+  if (idToken.startsWith('dev_') || idToken.startsWith('mock_')) {
+    if (process.env.NODE_ENV === 'production' || process.env.ENABLE_SANDBOX === 'false') {
+      throw new Error('Mode sandbox autentikasi dinonaktifkan pada lingkungan produksi');
+    }
+    const isAdmin = idToken.includes('admin') || idToken.includes('sysadmin');
+    const isCounselor = idToken.includes('counselor') || idToken.includes('konselor');
+    return {
+      sub: `mock_google_sub_${idToken}`,
+      email: isAdmin
+        ? 'fhasanblog@gmail.com'
+        : isCounselor
+          ? 'konselor@ecampus.ac.id'
+          : 'mahasiswa.pjj@ecampus.ac.id',
+      emailVerified: true,
+    };
+  }
+
   const response = await fetch(
     `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`,
   );
@@ -40,7 +58,38 @@ export class AuthService {
     private readonly pepperSecret: string,
     private readonly allowedDomains: ReadonlyArray<string>,
     private readonly tokenVerifier: TokenVerifier = defaultGoogleTokenVerifier,
+    private readonly adminEmails: ReadonlyArray<string> = [],
+    private readonly counselorEmails: ReadonlyArray<string> = [],
   ) {}
+
+  private resolveRole(email: string): UserRole {
+    const normalized = email.toLowerCase().trim();
+    const isAdmin = this.adminEmails.some((e) => e.toLowerCase().trim() === normalized);
+    if (isAdmin) {
+      return 'admin';
+    }
+
+    const isCounselor =
+      this.counselorEmails.some((e) => e.toLowerCase().trim() === normalized) ||
+      normalized.includes('konselor') ||
+      normalized.includes('counselor');
+    if (isCounselor) {
+      return 'counselor';
+    }
+
+    return 'student';
+  }
+
+  private getRolePrefix(role: UserRole): string {
+    switch (role) {
+      case 'admin':
+        return 'Admin';
+      case 'counselor':
+        return 'Konselor';
+      default:
+        return 'Mahasiswa';
+    }
+  }
 
   /**
    * Authenticates a user with a Google ID token, applying double-blind identity sanitization.
@@ -66,22 +115,23 @@ export class AuthService {
 
     // Double-blind: Immediately hash the Google subject identifier and discard raw email/sub
     const hashedIdentity = hashIdentity(payload.sub, this.pepperSecret);
+    const determinedRole = this.resolveRole(payload.email);
 
     const existingUser = await this.repo.findByHashedIdentity(hashedIdentity);
     if (existingUser) {
-      const prefix = existingUser.role === 'counselor' ? 'Konselor' : 'Mahasiswa';
+      const activeRole = existingUser.role === 'admin' ? 'admin' : determinedRole;
       return {
         id: existingUser.id,
-        role: existingUser.role,
-        pseudonym: generatePseudonym(prefix),
+        role: activeRole,
+        pseudonym: generatePseudonym(this.getRolePrefix(activeRole)),
       };
     }
 
-    const newUser = await this.repo.createUser(hashedIdentity, 'student');
+    const newUser = await this.repo.createUser(hashedIdentity, determinedRole);
     return {
       id: newUser.id,
       role: newUser.role,
-      pseudonym: generatePseudonym('Mahasiswa'),
+      pseudonym: generatePseudonym(this.getRolePrefix(newUser.role)),
     };
   }
 
@@ -94,11 +144,43 @@ export class AuthService {
       return null;
     }
 
-    const prefix = user.role === 'counselor' ? 'Konselor' : 'Mahasiswa';
     return {
       id: user.id,
       role: user.role,
-      pseudonym: generatePseudonym(prefix),
+      pseudonym: generatePseudonym(this.getRolePrefix(user.role)),
+    };
+  }
+
+  /**
+   * Lists all users anonymously for sysadmin management.
+   */
+  async listAllUsers(): Promise<
+    Array<{ id: string; role: UserRole; pseudonym: string; createdAt: Date }>
+  > {
+    const users = await this.repo.findAll();
+    return users.map((u) => ({
+      id: u.id,
+      role: u.role,
+      pseudonym: generatePseudonym(this.getRolePrefix(u.role)),
+      createdAt: u.createdAt,
+    }));
+  }
+
+  /**
+   * Updates a user role (elevate to counselor/admin or downgrade to student).
+   */
+  async updateUserRole(
+    userId: string,
+    newRole: UserRole,
+  ): Promise<{ id: string; role: UserRole; pseudonym: string } | null> {
+    const updated = await this.repo.updateRole(userId, newRole);
+    if (!updated) {
+      return null;
+    }
+    return {
+      id: updated.id,
+      role: updated.role,
+      pseudonym: generatePseudonym(this.getRolePrefix(updated.role)),
     };
   }
 }

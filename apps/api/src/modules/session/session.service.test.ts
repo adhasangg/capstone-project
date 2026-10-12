@@ -39,6 +39,7 @@ describe('SessionService (TDD)', () => {
       getStudentSessions: mock().mockResolvedValue([sampleSession]),
       getWaitingQueue: mock().mockResolvedValue([sampleSession]),
       getSessionById: mock().mockResolvedValue(sampleSession),
+      getCounselorSessions: mock().mockResolvedValue([sampleSession]),
       assignCounselor: mock().mockResolvedValue({
         ...sampleSession,
         status: 'active',
@@ -68,6 +69,7 @@ describe('SessionService (TDD)', () => {
       getStudentSessions: mock(),
       getWaitingQueue: mock().mockResolvedValue([sampleSession]),
       getSessionById: mock(),
+      getCounselorSessions: mock(),
       assignCounselor: mock(),
       closeSession: mock(),
     };
@@ -80,6 +82,28 @@ describe('SessionService (TDD)', () => {
     expect(queue[0]?.status).toBe('waiting');
   });
 
+  it('should allow counselor to view their own handled sessions history', async () => {
+    const counselorId = '33333333-3333-3333-3333-333333333333';
+    const mockRepo: ISessionRepository = {
+      createSession: mock(),
+      getStudentSessions: mock(),
+      getWaitingQueue: mock(),
+      getSessionById: mock(),
+      getCounselorSessions: mock().mockResolvedValue([
+        { ...sampleSession, counselorId, status: 'active' },
+      ]),
+      assignCounselor: mock(),
+      closeSession: mock(),
+    };
+
+    const service = new SessionService(mockRepo);
+    const history = await service.getCounselorHistory(counselorId);
+
+    expect(history.length).toBe(1);
+    expect(history[0]?.counselorId).toBe(counselorId);
+    expect(mockRepo.getCounselorSessions).toHaveBeenCalledWith(counselorId);
+  });
+
   it('should allow counselor to accept a waiting ticket', async () => {
     const counselorId = '33333333-3333-3333-3333-333333333333';
     const mockRepo: ISessionRepository = {
@@ -87,6 +111,7 @@ describe('SessionService (TDD)', () => {
       getStudentSessions: mock(),
       getWaitingQueue: mock(),
       getSessionById: mock().mockResolvedValue(sampleSession),
+      getCounselorSessions: mock(),
       assignCounselor: mock().mockResolvedValue({
         ...sampleSession,
         counselorId,
@@ -111,6 +136,7 @@ describe('SessionService (TDD)', () => {
         ...sampleSession,
         status: 'active',
       }),
+      getCounselorSessions: mock(),
       assignCounselor: mock(),
       closeSession: mock(),
     };

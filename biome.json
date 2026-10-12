@@ -9,7 +9,9 @@
       "coverage",
       "bun.lockb",
       ".gitnexus",
-      ".claude"
+      ".claude",
+      "test-results",
+      "tests/e2e-report"
     ]
   },
   "organizeImports": {

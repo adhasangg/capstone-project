@@ -65,6 +65,6 @@ export {
 
 // Utilities
 export { hashIdentity } from './utils/crypto.utils';
-export { generatePseudonym } from './utils/pseudonym.utils';
+export { generatePseudonym, generateSessionPseudonym } from './utils/pseudonym.utils';
 export { calculateDass21Score } from './utils/dass21.utils';
 export { calculateVakScore } from './utils/vak.utils';

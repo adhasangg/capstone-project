@@ -5,7 +5,7 @@ import { useRef, useState } from 'react';
 import { api } from '../../services/api';
 
 const ICEBREAKERS = [
-  'Saya merasa sangat lelah membagi waktu antara kerja lembur dan deadline tuton.',
+  'Saya merasa sangat lelah membagi waktu antara kerja lembur dan deadline tugas kuliah.',
   'Tugas kuliah minggu ini menumpuk dan saya merasa sulit memulai mengerjakannya.',
   'Saya merasa cemas menghadapi ujian semester dan takut tidak bisa lulus.',
   'Saya merasa kesepian belajar jarak jauh dan butuh tempat bercerita tanpa dihakimi.',

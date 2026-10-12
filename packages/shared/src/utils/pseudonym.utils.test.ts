@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { generatePseudonym } from './pseudonym.utils';
+import { generatePseudonym, generateSessionPseudonym } from './pseudonym.utils';
 
 describe('generatePseudonym', () => {
   it('should generate a pseudonym with default prefix "Mahasiswa"', () => {
@@ -22,5 +22,22 @@ describe('generatePseudonym', () => {
       expect(num).toBeGreaterThanOrEqual(1000);
       expect(num).toBeLessThanOrEqual(9999);
     }
+  });
+});
+
+describe('generateSessionPseudonym', () => {
+  it('should generate empathetic session pseudonyms starting with "Sahabat "', () => {
+    const sessionPseudo = generateSessionPseudonym();
+    expect(sessionPseudo.startsWith('Sahabat ')).toBe(true);
+    expect(/^Sahabat [A-Za-z]+-[0-9]{2}$/.test(sessionPseudo)).toBe(true);
+  });
+
+  it('should generate unlinkable random pseudonyms on successive calls', () => {
+    const samples = new Set<string>();
+    for (let i = 0; i < 30; i++) {
+      samples.add(generateSessionPseudonym());
+    }
+    // Should have good diversity (at least 15 unique out of 30)
+    expect(samples.size).toBeGreaterThanOrEqual(15);
   });
 });

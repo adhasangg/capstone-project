@@ -1,18 +1,24 @@
 import type { CounselingSessionSelect } from '@safespace/db';
+import { generateSessionPseudonym } from '@safespace/shared';
 import type { CreateSessionDTO, ISessionRepository, SessionQueueItem } from './session.types';
 
 export class SessionService {
   constructor(private readonly sessionRepository: ISessionRepository) {}
 
   /**
-   * Creates a new anonymous counseling ticket with attached psychometric results.
+   * Creates a new anonymous counseling ticket with attached psychometric results and an ephemeral session pseudonym.
    */
   async createTicket(data: CreateSessionDTO): Promise<CounselingSessionSelect> {
-    if (!data.studentId || !data.studentPseudonym) {
-      throw new Error('Student ID and pseudonym are required');
+    if (!data.studentId) {
+      throw new Error('Student ID is required');
     }
 
-    return this.sessionRepository.createSession(data);
+    const studentPseudonym = data.studentPseudonym || generateSessionPseudonym();
+
+    return this.sessionRepository.createSession({
+      ...data,
+      studentPseudonym,
+    });
   }
 
   /**
@@ -55,6 +61,17 @@ export class SessionService {
     }
 
     return this.sessionRepository.assignCounselor(sessionId, counselorId);
+  }
+
+  /**
+   * Retrieves all counseling sessions handled by a specific counselor.
+   */
+  async getCounselorHistory(counselorId: string): Promise<CounselingSessionSelect[]> {
+    if (!counselorId) {
+      throw new Error('Counselor ID is required');
+    }
+
+    return this.sessionRepository.getCounselorSessions(counselorId);
   }
 
   /**
