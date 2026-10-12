@@ -9,35 +9,35 @@
 Dalam perancangan sistem informasi pra-konseling SafeSpace PWA, penentuan kondisi emosional dan profil belajar mahasiswa **wajib bebas dari bias dan halusinasi kecerdasan buatan (*non-AI black box*)**. Oleh karena itu, sistem mengadopsi dua instrumen baku yang dihitung secara deterministik matematika:
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                                 DUAL-INSTRUMENT ENGINE                                 â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ 1. DASS-21 (Lovibond & Lovibond, 1995)   â”‚ 2. VAK Model (Fleming, 1992; DePorter, 2000) â”‚
-â”‚    Fungsi: Mengukur masalah emosional    â”‚    Fungsi: Menyediakan solusi konkret       â”‚
-â”‚    ("What the emotional problem is")     â”‚    ("Pedagogical exit strategy")            â”‚
-â”‚    Dimensi: Depresi, Kecemasan, Stres    â”‚    Dimensi: Visual, Auditori, Kinestetik    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
++---------------------------------------------------------------------------------------+
+|                                 DUAL-INSTRUMENT ENGINE                                 |
++-------------------------------------------+-------------------------------------------+
+| 1. DASS-21 (Lovibond & Lovibond, 1995)   | 2. VAK Model (Fleming, 1992; DePorter, 2000) |
+|    Fungsi: Mengukur masalah emosional    |    Fungsi: Menyediakan solusi konkret       |
+|    ("What the emotional problem is")     |    ("Pedagogical exit strategy")            |
+|    Dimensi: Depresi, Kecemasan, Stres    |    Dimensi: Visual, Auditori, Kinestetik    |
++-------------------------------------------+-------------------------------------------+
 ```
 
 ### Rujukan Ilmiah Utama (Buku & Jurnal Terakreditasi):
 1. **DASS-21:**
    - **Lovibond, S. H., & Lovibond, P. F. (1995).** *Manual for the Depression Anxiety Stress Scales (2nd ed.)*. Psychology Foundation of Sydney.
-   - **Antony, M. M., et al. (1998).** Psychometric properties of the 42-item and 21-item versions of the Depression Anxiety Stress Scales. *Psychological Assessment*, 10(2), 176â€“181.
-   - **Fitriana, T. S., dkk. (2023).** Uji Validitas dan Reliabilitas Konstruk DASS-21. *Jurnal Psikologi Ulayat: Indonesian Journal of Indigenous Psychology*, 10(2), 232â€“250.
-   - **Arjanto, P. (2022).** Uji Reliabilitas dan Validitas Depression Anxiety Stress Scales 21 (DASS-21) pada Mahasiswa. *Jurnal Psikologi Perseptual*, 7(1), 12â€“25.
+   - **Antony, M. M., et al. (1998).** Psychometric properties of the 42-item and 21-item versions of the Depression Anxiety Stress Scales. *Psychological Assessment*, 10(2), 176-181.
+   - **Fitriana, T. S., dkk. (2023).** Uji Validitas dan Reliabilitas Konstruk DASS-21. *Jurnal Psikologi Ulayat: Indonesian Journal of Indigenous Psychology*, 10(2), 232-250.
+   - **Arjanto, P. (2022).** Uji Reliabilitas dan Validitas Depression Anxiety Stress Scales 21 (DASS-21) pada Mahasiswa. *Jurnal Psikologi Perseptual*, 7(1), 12-25.
 2. **VAK (Visual, Auditory, Kinesthetic):**
-   - **Fleming, N. D., & Mills, C. (1992).** Not another inventory, rather a catalyst for reflection. *To Improve the Academy*, 11(1), 137â€“155.
+   - **Fleming, N. D., & Mills, C. (1992).** Not another inventory, rather a catalyst for reflection. *To Improve the Academy*, 11(1), 137-155.
    - **DePorter, B., & Hernacki, M. (2000).** *Quantum Learning: Membiasakan Belajar Nyaman dan Menyenangkan*. Kaifa, Bandung.
    - **Chislett, V., & Chapman, A. (2005).** *VAK Learning Styles Self-Assessment Questionnaire*. Businessballs.
-   - **Ramadhan, F., dkk. (2024).** Implementasi Model Pembelajaran VAK di Pendidikan Kejuruan: Systematic Literature Review. *Jurnal Ilmiah Edutic*, 10(2), 149â€“159.
-   - **Puspitasari, E. I., & Affandi, G. R. (2024).** Pengaruh stres akademik dan cognitive load terhadap motivasi belajar siswa. *Jurnal Psikologi*, 11(2), 374â€“388.
+   - **Ramadhan, F., dkk. (2024).** Implementasi Model Pembelajaran VAK di Pendidikan Kejuruan: Systematic Literature Review. *Jurnal Ilmiah Edutic*, 10(2), 149-159.
+   - **Puspitasari, E. I., & Affandi, G. R. (2024).** Pengaruh stres akademik dan cognitive load terhadap motivasi belajar siswa. *Jurnal Psikologi*, 11(2), 374-388.
 
 ---
 
 ## 2. Formulir Instrumen Baku DASS-21 (Bahasa Indonesia)
 
 ### 2.1. Petunjuk Pengisian & Skala Respons
-Responden diminta mengevaluasi kondisi psikologis yang dialami **selama satu minggu terakhir** dengan skala 4 poin Likert (0â€“3):
+Responden diminta mengevaluasi kondisi psikologis yang dialami **selama satu minggu terakhir** dengan skala 4 poin Likert (0-3):
 
 | Nilai Skor | Keterangan Respon | Deskripsi Operasional |
 | :---: | :--- | :--- |
@@ -85,10 +85,10 @@ $$\text{Skor Subskala Akhir} = \left( \sum_{i \in \text{Item Subskala}} \text{Sk
 #### Tabel Klasifikasi Tingkat Keparahan (Cut-Off Norms):
 | Kategori Keparahan | Depresi (D) | Kecemasan (A) | Stres (S) | Rekomendasi Triage SafeSpace |
 | :--- | :---: | :---: | :---: | :--- |
-| **Normal** | 0 â€“ 9 | 0 â€“ 7 | 0 â€“ 14 | Rekomendasi modul belajar mandiri VAK. |
-| **Ringan (*Mild*)** | 10 â€“ 13 | 8 â€“ 9 | 15 â€“ 18 | Rekomendasi tips manajemen stres akademik & VAK. |
-| **Sedang (*Moderate*)** | 14 â€“ 20 | 10 â€“ 14 | 19 â€“ 25 | Notifikasi opsi membuka tiket pra-konseling anonim. |
-| **Berat (*Severe*)** | 21 â€“ 27 | 15 â€“ 19 | 26 â€“ 33 | **Saran Kuat:** Buka tiket pra-konseling + lampiran otomatis. |
+| **Normal** | 0 - 9 | 0 - 7 | 0 - 14 | Rekomendasi modul belajar mandiri VAK. |
+| **Ringan (*Mild*)** | 10 - 13 | 8 - 9 | 15 - 18 | Rekomendasi tips manajemen stres akademik & VAK. |
+| **Sedang (*Moderate*)** | 14 - 20 | 10 - 14 | 19 - 25 | Notifikasi opsi membuka tiket pra-konseling anonim. |
+| **Berat (*Severe*)** | 21 - 27 | 15 - 19 | 26 - 33 | **Saran Kuat:** Buka tiket pra-konseling + lampiran otomatis. |
 | **Sangat Berat (*Extremely Severe*)** | **28+** | **20+** | **34+** | **Saran Darurat:** Akses konseling segera & rujukan formal. |
 
 ---
@@ -149,10 +149,10 @@ Berdasarkan hasil profil gaya belajar VAK, SafeSpace otomatis menyajikan panduan
 
 | Gaya Belajar Dominan | Akar Pemicu Burnout PJJ | Strategi Intervensi Pemulihan (*Exit Strategy*) |
 | :--- | :--- | :--- |
-| **Visual** | Lelah menatap modul PDF panjang tanpa hierarki visual yang jelas; pusing dengan teks monoton di LMS. | â€¢ Gunakan teknik **Mind Mapping** (pohon konsep berwarna) untuk merangkum modul.<br/>â€¢ Beri highlight warna berbeda (hijau untuk teori, kuning untuk contoh, oranye untuk rumus).<br/>â€¢ Konversikan tabel teori menjadi infografis sederhana. |
-| **Auditori** | Jenuh dan kesepian belajar mandiri dalam hening (*asynchronous isolation*); materi teks tidak menempel tanpa ada suara penjelas. | â€¢ Gunakan fitur **Text-to-Speech (TTS)** untuk mendengarkan modul sambil beraktivitas.<br/>â€¢ Rekam suara sendiri saat merangkum materi lalu dengarkan kembali saat perjalanan kerja.<br/>â€¢ Gunakan teknik *Feynman* (menjelaskan materi secara lisan kepada diri sendiri). |
-| **Kinestetik** | Gelisah dan cepat kehilangan fokus akibat duduk diam berjam-jam membaca layar setelah seharian bekerja di kantor. | â€¢ Terapkan metode **Active Pomodoro** (25 menit belajar intensif + 5 menit bergerak fisik).<br/>â€¢ Buat flashcard fisik yang bisa dipegang dan dibolak-balik.<br/>â€¢ Terapkan materi langsung ke studi kasus kerja nyata atau lakukan *kinetic writing* (menulis di papan tulis/kertas besar). |
-| **Multimodal** | Bingung memilih satu metode dan mudah merasa bosan jika media belajar tidak variatif. | â€¢ Kombinasikan visual (mind map) dengan diskusi kelompok suara dan praktik simulasi secara bergantian per sesi belajar. |
+| **Visual** | Lelah menatap modul PDF panjang tanpa hierarki visual yang jelas; pusing dengan teks monoton di LMS. | - Gunakan teknik **Mind Mapping** (pohon konsep berwarna) untuk merangkum modul.<br/>- Beri highlight warna berbeda (hijau untuk teori, kuning untuk contoh, oranye untuk rumus).<br/>- Konversikan tabel teori menjadi infografis sederhana. |
+| **Auditori** | Jenuh dan kesepian belajar mandiri dalam hening (*asynchronous isolation*); materi teks tidak menempel tanpa ada suara penjelas. | - Gunakan fitur **Text-to-Speech (TTS)** untuk mendengarkan modul sambil beraktivitas.<br/>- Rekam suara sendiri saat merangkum materi lalu dengarkan kembali saat perjalanan kerja.<br/>- Gunakan teknik *Feynman* (menjelaskan materi secara lisan kepada diri sendiri). |
+| **Kinestetik** | Gelisah dan cepat kehilangan fokus akibat duduk diam berjam-jam membaca layar setelah seharian bekerja di kantor. | - Terapkan metode **Active Pomodoro** (25 menit belajar intensif + 5 menit bergerak fisik).<br/>- Buat flashcard fisik yang bisa dipegang dan dibolak-balik.<br/>- Terapkan materi langsung ke studi kasus kerja nyata atau lakukan *kinetic writing* (menulis di papan tulis/kertas besar). |
+| **Multimodal** | Bingung memilih satu metode dan mudah merasa bosan jika media belajar tidak variatif. | - Kombinasikan visual (mind map) dengan diskusi kelompok suara dan praktik simulasi secara bergantian per sesi belajar. |
 
 ---
 

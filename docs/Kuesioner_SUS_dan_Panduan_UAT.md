@@ -67,9 +67,9 @@ Berdasarkan skala empiris Bangor, Kortum, & Miller (2008) serta Lewis (2018):
 
 | Rentang Skor SUS | Derajat Kelayakan (*Acceptability*) | Skala Nilai (*Grade Scale*) | Kategori Penilaian Sifat (*Adjective Rating*) |
 | :---: | :---: | :---: | :---: |
-| **â‰¥ 80.3** | **Acceptable (Sangat Layak)** | **Grade A** | **Excellent / Best Imaginable** |
-| **68.0 â€“ 80.2** | **Acceptable (Layak)** | **Grade B / C** | **Good (Bagus)** |
-| **51.0 â€“ 67.9** | **Marginal (Batas Toleransi)** | **Grade D** | **OK (Cukup / Perlu Perbaikan)** |
+| **>= 80.3** | **Acceptable (Sangat Layak)** | **Grade A** | **Excellent / Best Imaginable** |
+| **68.0 - 80.2** | **Acceptable (Layak)** | **Grade B / C** | **Good (Bagus)** |
+| **51.0 - 67.9** | **Marginal (Batas Toleransi)** | **Grade D** | **OK (Cukup / Perlu Perbaikan)** |
 | **< 51.0** | **Not Acceptable (Tidak Layak)** | **Grade F** | **Poor / Awful (Buruk)** |
 
 > [!IMPORTANT]

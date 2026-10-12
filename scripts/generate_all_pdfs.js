@@ -26,6 +26,30 @@ const FILES_TO_CONVERT = [
     title: 'BANK BAHAN DEVELOPMENT - SAFESPACE PWA',
     subtitle: 'Kumpulan Metrik, Fitur Unggulan, Aset Gambar, dan Diagram untuk Slide & Laporan',
   },
+  {
+    input: path.join(DOCS_DIR, 'Matriks_Black_Box_Testing.md'),
+    output: path.join(DOCS_DIR, 'Matriks_Black_Box_Testing.pdf'),
+    title: 'MATRIKS BLACK-BOX TESTING - SAFESPACE PWA',
+    subtitle: 'Rancangan dan Hasil Uji Fungsionalitas Sistem (13 Skenario Pengujian Lolos 100%)',
+  },
+  {
+    input: path.join(DOCS_DIR, 'Kuesioner_SUS_dan_Panduan_UAT.md'),
+    output: path.join(DOCS_DIR, 'Kuesioner_SUS_dan_Panduan_UAT.pdf'),
+    title: 'KUESIONER SUS & PANDUAN UAT - SAFESPACE PWA',
+    subtitle: 'Instrumen Pengujian Kelaikan dan Usabilitas Sistem (System Usability Scale)',
+  },
+  {
+    input: path.join(DOCS_DIR, 'Instrumen_Baku_DASS21_dan_VAK.md'),
+    output: path.join(DOCS_DIR, 'Instrumen_Baku_DASS21_dan_VAK.pdf'),
+    title: 'INSTRUMEN BAKU KLINIS DASS-21 & VAK - SAFESPACE PWA',
+    subtitle: 'Spesifikasi Pembobotan, Formula Skor, dan Parameter Deteksi Kejenuhan Belajar',
+  },
+  {
+    input: path.join(DOCS_DIR, 'Daftar_Pustaka_Mutakhir_5_Tahun.md'),
+    output: path.join(DOCS_DIR, 'Daftar_Pustaka_Mutakhir_5_Tahun.pdf'),
+    title: 'DAFTAR PUSTAKA MUTAKHIR - SAFESPACE PWA',
+    subtitle: 'Kompilasi Rujukan Ilmiah Terindeks Bereputasi (IEEE, ACM, Scopus, SINTA)',
+  },
 ];
 
 // Read assets
@@ -183,7 +207,15 @@ function buildHtml(contentHtml, docMeta) {
       border-collapse: collapse;
       margin-top: 14px;
       margin-bottom: 18px;
-      font-size: 9pt;
+      font-size: 8.5pt;
+      page-break-inside: auto;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    tr {
       page-break-inside: avoid;
     }
 
