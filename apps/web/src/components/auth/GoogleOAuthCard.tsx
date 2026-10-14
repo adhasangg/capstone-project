@@ -175,12 +175,15 @@ export const GoogleOAuthCard: React.FC<GoogleOAuthCardProps> = ({ onLoginSuccess
     localStorage.setItem('safespace_google_client_id', val.trim());
   };
 
-  const isSandboxEnvAllowed =
-    import.meta.env.VITE_ENABLE_SANDBOX !== 'false' && import.meta.env.MODE !== 'production';
+  const isSandboxEnvAllowed = import.meta.env.VITE_ENABLE_SANDBOX !== 'false';
 
   const [sandboxUnlocked, setSandboxUnlocked] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
-    const urlKey = new URLSearchParams(window.location.search).get('sandbox_key');
+    const searchParams = new URLSearchParams(window.location.search);
+    const hashParams = window.location.hash.includes('?')
+      ? new URLSearchParams(window.location.hash.split('?')[1])
+      : null;
+    const urlKey = searchParams.get('sandbox_key') || hashParams?.get('sandbox_key');
     const stored = sessionStorage.getItem('safespace_sandbox_unlocked');
     return urlKey === 'safespace-evaluator-2026' || stored === 'true';
   });

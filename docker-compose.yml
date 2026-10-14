@@ -1,0 +1,152 @@
+networks:
+  safespace-net:
+    driver: bridge
+  shared-network:
+    external: true
+
+volumes:
+  safespace_test_db_data:
+  safespace_prod_db_data:
+
+services:
+  # ========================================================
+  # TESTING ENVIRONMENT (MODE TESTING / EVALUATOR SANDBOX)
+  # ========================================================
+  safespace-db-test:
+    container_name: safespace-db-test
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: safespace_testing_db
+      POSTGRES_USER: safespace_user
+      POSTGRES_PASSWORD: safespace_test_pass_2026
+    volumes:
+      - safespace_test_db_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5441:5432"
+    networks:
+      - safespace-net
+      - shared-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U safespace_user -d safespace_testing_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  safespace-test-api:
+    container_name: safespace-test-api
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    image: safespace-api:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      ENABLE_SANDBOX: "true"
+      SANDBOX_PASSPHRASE: "safespace-evaluator-2026"
+      DB_HOST: safespace-db-test
+      DB_PORT: 5432
+      DB_USER: safespace_user
+      DB_PASSWORD: safespace_test_pass_2026
+      DB_NAME: safespace_testing_db
+      JWT_SECRET: "safespace_test_jwt_secret_key_testing_12345"
+      IDENTITY_PEPPER_SECRET: "safespace_test_identity_pepper_testing_12345"
+      ALLOWED_EMAIL_DOMAINS: "ecampus.ut.ac.id,*"
+      ADMIN_EMAILS: "fhasanblog@gmail.com"
+      COUNSELOR_EMAILS: "konselor@ecampus.ac.id"
+    ports:
+      - "3021:3000"
+    depends_on:
+      safespace-db-test:
+        condition: service_healthy
+    networks:
+      - safespace-net
+      - shared-network
+
+  safespace-test-web:
+    container_name: safespace-test-web
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    image: safespace-web:latest
+    restart: unless-stopped
+    volumes:
+      - ./docker/nginx-test.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8021:80"
+    depends_on:
+      - safespace-test-api
+    networks:
+      - safespace-net
+      - shared-network
+
+  # ========================================================
+  # PRODUCTION ENVIRONMENT (MODE PRODUCTION SECURED)
+  # ========================================================
+  safespace-db-prod:
+    container_name: safespace-db-prod
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: safespace_prod_db
+      POSTGRES_USER: safespace_user
+      POSTGRES_PASSWORD: safespace_prod_pass_2026_secured
+    volumes:
+      - safespace_prod_db_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5440:5432"
+    networks:
+      - safespace-net
+      - shared-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U safespace_user -d safespace_prod_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  safespace-prod-api:
+    container_name: safespace-prod-api
+    image: safespace-api:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      ENABLE_SANDBOX: "false"
+      DB_HOST: safespace-db-prod
+      DB_PORT: 5432
+      DB_USER: safespace_user
+      DB_PASSWORD: safespace_prod_pass_2026_secured
+      DB_NAME: safespace_prod_db
+      JWT_SECRET: "safespace_prod_jwt_secret_key_production_98765"
+      IDENTITY_PEPPER_SECRET: "safespace_prod_identity_pepper_production_98765"
+      ALLOWED_EMAIL_DOMAINS: "ecampus.ut.ac.id,*"
+      ADMIN_EMAILS: "fhasanblog@gmail.com"
+      COUNSELOR_EMAILS: "konselor@ecampus.ac.id"
+    ports:
+      - "3020:3000"
+    depends_on:
+      safespace-db-prod:
+        condition: service_healthy
+      safespace-test-api:
+        condition: service_started
+    networks:
+      - safespace-net
+      - shared-network
+
+  safespace-prod-web:
+    container_name: safespace-prod-web
+    image: safespace-web:latest
+    restart: unless-stopped
+    volumes:
+      - ./docker/nginx-prod.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8020:80"
+    depends_on:
+      - safespace-prod-api
+      - safespace-test-web
+    networks:
+      - safespace-net
+      - shared-network

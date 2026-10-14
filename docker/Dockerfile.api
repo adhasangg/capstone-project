@@ -1,0 +1,16 @@
+FROM oven/bun:1.2-alpine
+WORKDIR /app
+
+# Copy monorepo configuration & packages
+COPY package.json bun.lock tsconfig.json tsconfig.base.json ./
+COPY packages/ ./packages/
+COPY apps/api/ ./apps/api/
+
+# Install workspace dependencies and bundle standalone production API
+RUN bun install --frozen-lockfile || bun install
+RUN bun build apps/api/src/index.ts --target bun --outdir apps/api/dist
+
+ENV NODE_ENV=production
+WORKDIR /app/apps/api
+EXPOSE 3000
+CMD ["bun", "run", "dist/index.js"]
