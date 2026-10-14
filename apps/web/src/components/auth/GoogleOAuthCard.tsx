@@ -66,13 +66,16 @@ const GoogleGLogo: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }
   </svg>
 );
 
+const DEFAULT_GOOGLE_CLIENT_ID =
+  '917155815665-km4ltep9rafa9ogn3noc56oa55j5bhd7.apps.googleusercontent.com';
+
 export const GoogleOAuthCard: React.FC<GoogleOAuthCardProps> = ({ onLoginSuccess }) => {
   const [clientId, setClientId] = useState<string>(() => {
     return (
       (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) ||
       (import.meta.env.GOOGLE_CLIENT_ID as string) ||
       localStorage.getItem('safespace_google_client_id') ||
-      ''
+      DEFAULT_GOOGLE_CLIENT_ID
     );
   });
   const [showConfig, setShowConfig] = useState<boolean>(false);
@@ -103,7 +106,7 @@ export const GoogleOAuthCard: React.FC<GoogleOAuthCardProps> = ({ onLoginSuccess
   );
 
   useEffect(() => {
-    const trimmedId = clientId.trim();
+    const trimmedId = clientId.trim() || DEFAULT_GOOGLE_CLIENT_ID;
     if (!trimmedId || typeof window === 'undefined') return;
 
     const setupGis = () => {
@@ -149,7 +152,8 @@ export const GoogleOAuthCard: React.FC<GoogleOAuthCardProps> = ({ onLoginSuccess
   }, [clientId, handleCredential]);
 
   const handleCustomGoogleClick = () => {
-    if (window.google?.accounts?.id && clientId.trim()) {
+    const activeId = clientId.trim() || DEFAULT_GOOGLE_CLIENT_ID;
+    if (window.google?.accounts?.id && activeId) {
       window.google.accounts.id.prompt();
     } else {
       setShowConfig(true);
