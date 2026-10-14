@@ -1,7 +1,5 @@
 import {
   AlertCircle,
-  ChevronDown,
-  ChevronUp,
   KeyRound,
   Loader2,
   Lock,
@@ -74,11 +72,9 @@ export const GoogleOAuthCard: React.FC<GoogleOAuthCardProps> = ({ onLoginSuccess
     return (
       (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) ||
       (import.meta.env.GOOGLE_CLIENT_ID as string) ||
-      localStorage.getItem('safespace_google_client_id') ||
       DEFAULT_GOOGLE_CLIENT_ID
     );
   });
-  const [showConfig, setShowConfig] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [gisReady, setGisReady] = useState<boolean>(false);
@@ -181,11 +177,9 @@ export const GoogleOAuthCard: React.FC<GoogleOAuthCardProps> = ({ onLoginSuccess
     if (window.google?.accounts?.id && activeId) {
       window.google.accounts.id.prompt();
     } else {
-      if (sandboxAllowed) {
-        setShowConfig(true);
-      } else {
-        setErrorMsg('Layanan Google Sign-In sedang dimuat... Silakan klik ulang atau muat ulang peramban Anda.');
-      }
+      setErrorMsg(
+        'Layanan Google Sign-In sedang dimuat... Silakan klik ulang atau muat ulang peramban Anda.',
+      );
     }
   };
 
@@ -201,11 +195,6 @@ export const GoogleOAuthCard: React.FC<GoogleOAuthCardProps> = ({ onLoginSuccess
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSaveClientId = (val: string) => {
-    setClientId(val);
-    localStorage.setItem('safespace_google_client_id', val.trim());
   };
 
   const [sandboxUnlocked, setSandboxUnlocked] = useState<boolean>(() => {
@@ -428,45 +417,6 @@ export const GoogleOAuthCard: React.FC<GoogleOAuthCardProps> = ({ onLoginSuccess
               </div>
             </form>
           </div>
-        </div>
-      )}
-
-      {/* Collapsible Client ID Configuration (Hanya tampil pada mode Sandbox / Evaluator) */}
-      {sandboxAllowed && (
-        <div className="pt-1">
-          <button
-            type="button"
-            onClick={() => setShowConfig(!showConfig)}
-            className="text-[11px] text-slate-500 hover:text-slate-700 flex items-center gap-1 cursor-pointer font-medium"
-          >
-            <KeyRound className="w-3 h-3 text-slate-400" />
-            <span>{showConfig ? 'Sembunyikan' : 'Konfigurasi'} Google Cloud Client ID</span>
-            {showConfig ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          </button>
-
-          {showConfig && (
-            <div className="mt-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
-              <label
-                htmlFor="google-client-id-input"
-                className="block text-[11px] font-medium text-slate-600"
-              >
-                Google OAuth Client ID (.apps.googleusercontent.com):
-              </label>
-              <input
-                id="google-client-id-input"
-                type="text"
-                value={clientId}
-                onChange={(e) => handleSaveClientId(e.target.value)}
-                placeholder="1234567890-xxx.apps.googleusercontent.com"
-                className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 font-mono focus:outline-none focus:ring-1 focus:ring-[#4A7C59]"
-              />
-              <p className="text-[10px] text-slate-400 leading-normal">
-                Masukkan Client ID dari Google Cloud Console dengan Authorized JavaScript Origins set
-                ke <code className="text-slate-600 font-bold">http://localhost:5173</code>. Client ID
-                akan disimpan di browser lokal Anda.
-              </p>
-            </div>
-          )}
         </div>
       )}
 
