@@ -201,7 +201,18 @@ function PublicContentRouter({
   }
 
   if (currentTab === 'docs') {
-    return <UserGuide onSelectTab={onNavigateTab} />;
+    if (!session) {
+      return (
+        <ProtectedAuthGate
+          badge="Rute Terproteksi"
+          badgeColorClass="text-[#4A7C59]"
+          title="Otentikasi Diperlukan untuk Panduan Aplikasi"
+          description="Panduan aplikasi disesuaikan secara khusus dengan peran Anda (Mahasiswa, Konselor, atau Sysadmin). Silakan masuk terlebih dahulu untuk mengakses modul panduan."
+          onLoginSuccess={onLoginSuccess}
+        />
+      );
+    }
+    return <UserGuide role={session.user.role} onSelectTab={onNavigateTab} />;
   }
 
   if (currentTab === 'auth') {
@@ -534,7 +545,7 @@ export function App() {
 
       <AnonymousBanner />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-x-hidden">
         <MainContentRouter
           currentTab={currentTab}
           session={session}

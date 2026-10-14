@@ -26,11 +26,16 @@ import { useState } from 'react';
 type GuideTab = 'student' | 'counselor' | 'admin' | 'pwa' | 'privacy' | 'api';
 
 interface UserGuideProps {
+  readonly role?: 'student' | 'counselor' | 'admin';
   readonly onSelectTab?: (tab: string) => void;
 }
 
-export const UserGuide: React.FC<UserGuideProps> = ({ onSelectTab }) => {
-  const [activeTab, setActiveTab] = useState<GuideTab>('student');
+export const UserGuide: React.FC<UserGuideProps> = ({ role = 'student', onSelectTab }) => {
+  const [activeTab, setActiveTab] = useState<GuideTab>(() => {
+    if (role === 'counselor') return 'counselor';
+    if (role === 'admin') return 'admin';
+    return 'student';
+  });
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleActionClick = (targetTab: string) => {
@@ -39,32 +44,64 @@ export const UserGuide: React.FC<UserGuideProps> = ({ onSelectTab }) => {
     }
   };
 
+  const getHeaderMeta = () => {
+    if (role === 'counselor') {
+      return {
+        badge: 'Buku Panduan Konselor Sebaya & Dosen BK',
+        badgeColor: 'text-[#24365D]',
+        badgeBg: 'bg-blue-50 border-blue-200',
+        title: 'Standar Operasional Triage & Pendampingan Sebaya',
+        subtitle:
+          'Panduan praktis membaca prioritas keparahan emosional DASS-21, memberikan intervensi belajar adaptif berdasarkan modalitas VAK, dan etika kerahasiaan Two-Way Anonymity.',
+      };
+    }
+    if (role === 'admin') {
+      return {
+        badge: 'Dokumentasi Administrator Sistem & Pengembang',
+        badgeColor: 'text-purple-800',
+        badgeBg: 'bg-purple-50 border-purple-200',
+        title: 'Tata Kelola Hak Akses, Keamanan & Swagger API',
+        subtitle:
+          'Panduan manajemen akun pengguna, elevasi peran dari mahasiswa ke konselor/admin, monitoring metrik burnout agregat, dan dokumentasi teknis API.',
+      };
+    }
+    return {
+      badge: 'Buku Panduan Mahasiswa PJJ',
+      badgeColor: 'text-[#31523A]',
+      badgeBg: 'bg-emerald-50 border-[#C7D9CC]',
+      title: 'Panduan Pemetaan Burnout & Konseling Anonim',
+      subtitle:
+        'Panduan langkah demi langkah menggunakan instrumen baku DASS-21, pemetaan gaya belajar VAK, curhat reflektif, hingga membuka tiket pra-konseling anonim yang aman.',
+    };
+  };
+
+  const meta = getHeaderMeta();
+
   return (
-    <div className="space-y-8 py-4 max-w-5xl mx-auto text-left">
+    <div className="space-y-6 sm:space-y-8 py-2 sm:py-4 max-w-5xl mx-auto text-left">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#E3ECE5] via-[#F4F7F4] to-[#F9F9F6] border border-[#C7D9CC]/80 p-6 sm:p-10 shadow-xs">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 border border-[#C7D9CC] text-[#31523A] text-xs font-semibold shadow-2xs">
-            <BookOpen className="w-4 h-4 text-[#4A7C59]" />
-            <span>Pusat Panduan &amp; Dokumentasi Pengguna SafeSpace PWA</span>
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#E3ECE5] via-[#F4F7F4] to-[#F9F9F6] border border-[#C7D9CC]/80 p-5 sm:p-10 shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${meta.badgeBg} ${meta.badgeColor} text-xs font-semibold shadow-2xs border`}
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>{meta.badge}</span>
           </div>
           <span className="text-[11px] font-semibold text-slate-500 bg-white/80 px-2.5 py-1 rounded-full border border-slate-200">
-            Versi Aplikasi: 1.0.0 &bull; E-Tutorial Terbuka
+            Peran Aktif:{' '}
+            <strong className="capitalize text-slate-700">
+              {role === 'admin' ? 'Sysadmin' : role === 'counselor' ? 'Konselor' : 'Mahasiswa'}
+            </strong>
           </span>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1E293B] tracking-tight leading-snug mb-3">
-          Panduan Lengkap Penggunaan{' '}
-          <span className="text-[#4A7C59] underline decoration-[#C7D9CC] decoration-wavy decoration-2">
-            SafeSpace PWA
-          </span>
+        <h1 className="text-xl sm:text-3xl font-extrabold text-[#1E293B] tracking-tight leading-snug mb-2 sm:mb-3">
+          {meta.title}
         </h1>
 
-        <p className="text-slate-600 text-xs sm:text-sm max-w-3xl leading-relaxed mb-6">
-          Selamat datang di buku panduan interaktif SafeSpace. Sistem ini dirancang khusus untuk
-          mendukung mahasiswa Pendidikan Jarak Jauh (PJJ) dalam mendeteksi kejenuhan akademis
-          (academic burnout), mengidentifikasi gaya belajar dominan, dan mengakses konseling anonim
-          dua arah yang aman, privat, serta hemat kuota.
+        <p className="text-slate-600 text-xs sm:text-sm max-w-3xl leading-relaxed mb-5">
+          {meta.subtitle}
         </p>
 
         {/* Quick Search Input */}
@@ -74,7 +111,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ onSelectTab }) => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari topik (misal: offline, DASS-21, konselor, tiket, e2ee)..."
+            placeholder="Cari kata kunci dalam panduan ini..."
             className="w-full pl-10 pr-4 py-2 bg-white rounded-xl border border-slate-300 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4A7C59]/30 focus:border-[#4A7C59] shadow-2xs"
           />
           {searchQuery && (
@@ -89,84 +126,91 @@ export const UserGuide: React.FC<UserGuideProps> = ({ onSelectTab }) => {
         </div>
       </div>
 
-      {/* Navigation Tab Bar */}
+      {/* Navigation Tab Bar: Filtered per Role */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 text-xs font-semibold scrollbar-thin">
-        <button
-          type="button"
-          onClick={() => setActiveTab('student')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all shrink-0 cursor-pointer ${
-            activeTab === 'student'
-              ? 'bg-[#4A7C59] text-white shadow-xs'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>1. Panduan Mahasiswa PJJ</span>
-        </button>
+        {role === 'student' && (
+          <button
+            type="button"
+            onClick={() => setActiveTab('student')}
+            className={`flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all shrink-0 cursor-pointer ${
+              activeTab === 'student'
+                ? 'bg-[#4A7C59] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            <span>Panduan Mahasiswa</span>
+          </button>
+        )}
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('counselor')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all shrink-0 cursor-pointer ${
-            activeTab === 'counselor'
-              ? 'bg-[#3B5998] text-white shadow-xs'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-          }`}
-        >
-          <Heart className="w-4 h-4" />
-          <span>2. Panduan Konselor Sebaya &amp; Dosen</span>
-        </button>
+        {role === 'counselor' && (
+          <button
+            type="button"
+            onClick={() => setActiveTab('counselor')}
+            className={`flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all shrink-0 cursor-pointer ${
+              activeTab === 'counselor'
+                ? 'bg-[#3B5998] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            <Heart className="w-4 h-4" />
+            <span>Panduan Konselor &amp; Dosen BK</span>
+          </button>
+        )}
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('admin')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all shrink-0 cursor-pointer ${
-            activeTab === 'admin'
-              ? 'bg-purple-700 text-white shadow-xs'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-          }`}
-        >
-          <Shield className="w-4 h-4" />
-          <span>3. Panduan Administrator</span>
-        </button>
+        {role === 'admin' && (
+          <>
+            <button
+              type="button"
+              onClick={() => setActiveTab('admin')}
+              className={`flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all shrink-0 cursor-pointer ${
+                activeTab === 'admin'
+                  ? 'bg-purple-700 text-white shadow-xs'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <Shield className="w-4 h-4" />
+              <span>Manajemen Sysadmin</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('api')}
+              className={`flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all shrink-0 cursor-pointer ${
+                activeTab === 'api'
+                  ? 'bg-slate-800 text-white shadow-xs'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <Code2 className="w-4 h-4" />
+              <span>Dokumen API &amp; Swagger</span>
+            </button>
+          </>
+        )}
 
         <button
           type="button"
           onClick={() => setActiveTab('pwa')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all shrink-0 cursor-pointer ${
+          className={`flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all shrink-0 cursor-pointer ${
             activeTab === 'pwa'
               ? 'bg-emerald-700 text-white shadow-xs'
               : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
           }`}
         >
           <Smartphone className="w-4 h-4" />
-          <span>4. PWA &amp; Mode Offline</span>
+          <span>PWA &amp; Mode Offline</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('privacy')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all shrink-0 cursor-pointer ${
+          className={`flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all shrink-0 cursor-pointer ${
             activeTab === 'privacy'
               ? 'bg-amber-700 text-white shadow-xs'
               : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
           }`}
         >
           <Lock className="w-4 h-4" />
-          <span>5. Privasi &amp; FAQ</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('api')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all shrink-0 cursor-pointer ${
-            activeTab === 'api'
-              ? 'bg-slate-800 text-white shadow-xs'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-          }`}
-        >
-          <Code2 className="w-4 h-4" />
-          <span>6. Dokumen API / Swagger</span>
+          <span>Privasi &amp; FAQ</span>
         </button>
       </div>
 
