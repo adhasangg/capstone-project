@@ -69,9 +69,7 @@ export const CounselorQueue: React.FC<CounselorQueueProps> = ({ session, onEnter
             <ShieldCheck className="w-4 h-4 text-[#3B5998]" />
             <span>Portal Konselor Sebaya & Psikolog Kampus</span>
           </div>
-          <h1 className="text-2xl font-bold text-[#1E293B]">
-            Antrean Triage Pra-Konseling Anonim
-          </h1>
+          <h1 className="text-2xl font-bold text-[#1E293B]">Antrean Triage Pra-Konseling Anonim</h1>
           <p className="text-xs text-slate-600 max-w-xl mt-1 leading-relaxed">
             Data identitas mahasiswa sepenuhnya anonim (menggunakan nama samaran dinamis per tiket).
             Anda dapat meninjau profil DASS-21 dan gaya belajar VAK yang terlampir untuk merancang

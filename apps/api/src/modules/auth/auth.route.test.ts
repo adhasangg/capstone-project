@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import type { UserAuthSelect } from '@safespace/db';
+import type { UserRole } from '@safespace/shared';
 import { Elysia } from 'elysia';
 import type { IAuthRepository } from './auth.repository';
 import { createAuthRoute } from './auth.route';
@@ -27,6 +28,17 @@ class MockRouteAuthRepository implements IAuthRepository {
 
   async findById(id: string): Promise<UserAuthSelect | null> {
     return this.users.find((u) => u.id === id) ?? null;
+  }
+
+  async findAll(): Promise<UserAuthSelect[]> {
+    return this.users;
+  }
+
+  async updateRole(id: string, role: UserRole): Promise<UserAuthSelect | null> {
+    const user = this.users.find((u) => u.id === id);
+    if (!user) return null;
+    user.role = role;
+    return user;
   }
 }
 

@@ -8,11 +8,13 @@ import { ChatRoom } from './components/chat/ChatRoom';
 import { AdminDashboard } from './components/dashboard/AdminDashboard';
 import { CounselorQueue } from './components/dashboard/CounselorQueue';
 import { StudentDashboard } from './components/dashboard/StudentDashboard';
+import { UserGuide } from './components/docs/UserGuide';
 import { AboutSection } from './components/home/AboutSection';
 import { LandingHero } from './components/home/LandingHero';
 import { AnonymousBanner } from './components/layout/AnonymousBanner';
 import { Navbar } from './components/layout/Navbar';
 import type { AuthSession } from './services/api';
+import { offlineStorage } from './services/offlineStorage';
 
 const parseTabFromHash = (hash: string): string => {
   const clean = hash.replace(/^#\/?/, '').split('?')[0].trim().toLowerCase();
@@ -20,6 +22,14 @@ const parseTabFromHash = (hash: string): string => {
     case 'tentang':
     case 'about':
       return 'about';
+    case 'docs':
+    case 'doc':
+    case 'panduan':
+    case 'tutorial':
+    case 'guide':
+    case 'help':
+    case 'buku-panduan':
+      return 'docs';
     case 'auth':
     case 'login':
     case 'masuk':
@@ -57,6 +67,8 @@ const mapTabToHash = (tab: string): string => {
   switch (tab) {
     case 'about':
       return '#/tentang';
+    case 'docs':
+      return '#/docs';
     case 'auth':
       return '#/auth';
     case 'dashboard':
@@ -186,6 +198,10 @@ function PublicContentRouter({
         onGoToLogin={() => onNavigateTab('auth')}
       />
     );
+  }
+
+  if (currentTab === 'docs') {
+    return <UserGuide onSelectTab={onNavigateTab} />;
   }
 
   if (currentTab === 'auth') {
@@ -356,7 +372,12 @@ function StaffContentRouter(props: MainRouterProps) {
 function MainContentRouter(props: MainRouterProps) {
   const { currentTab } = props;
 
-  if (currentTab === 'home' || currentTab === 'about' || currentTab === 'auth') {
+  if (
+    currentTab === 'home' ||
+    currentTab === 'about' ||
+    currentTab === 'docs' ||
+    currentTab === 'auth'
+  ) {
     return <PublicContentRouter {...props} />;
   }
 
@@ -376,6 +397,13 @@ export function App() {
   });
 
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState<boolean>(() =>
+    typeof navigator !== 'undefined' ? navigator.onLine : true,
+  );
+  const [unsyncedCount, setUnsyncedCount] = useState<number>(
+    () => offlineStorage.getOfflineQueue().length,
+  );
+
   const [session, setSession] = useState<AuthSession | null>(() => {
     const saved = localStorage.getItem('safespace_session');
     if (saved) {
@@ -421,6 +449,35 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      void offlineStorage.syncPendingQueue(session?.token).then((res) => {
+        setUnsyncedCount(res.remaining);
+      });
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      setUnsyncedCount(offlineStorage.getOfflineQueue().length);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Initial check and auto-sync if back online
+    if (navigator.onLine && offlineStorage.getOfflineQueue().length > 0) {
+      void offlineStorage.syncPendingQueue(session?.token).then((res) => {
+        setUnsyncedCount(res.remaining);
+      });
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [session?.token]);
+
+  useEffect(() => {
     if (session) {
       localStorage.setItem('safespace_session', JSON.stringify(session));
     } else {
@@ -447,11 +504,13 @@ export function App() {
   const handleDass21Complete = (res: Dass21Result) => {
     setDass21Result(res);
     localStorage.setItem('safespace_dass21', JSON.stringify(res));
+    setUnsyncedCount(offlineStorage.getOfflineQueue().length);
   };
 
   const handleVakComplete = (res: VakResult) => {
     setVakResult(res);
     localStorage.setItem('safespace_vak', JSON.stringify(res));
+    setUnsyncedCount(offlineStorage.getOfflineQueue().length);
   };
 
   const handleEnterChat = (sessionId: string) => {
@@ -469,6 +528,8 @@ export function App() {
         }}
         session={session}
         onLogout={handleLogout}
+        isOnline={isOnline}
+        unsyncedCount={unsyncedCount}
       />
 
       <AnonymousBanner />

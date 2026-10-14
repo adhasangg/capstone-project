@@ -7,10 +7,12 @@ import {
   HelpCircle,
   RefreshCw,
   Sparkles,
+  WifiOff,
 } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { api } from '../../services/api';
+import { offlineStorage } from '../../services/offlineStorage';
 
 const DASS21_QUESTIONS = [
   'Saya merasa bahwa diri saya menjadi marah karena hal-hal sepele.',
@@ -73,6 +75,7 @@ export const Dass21Wizard: React.FC<Dass21WizardProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<number[]>(Array(21).fill(-1));
   const [result, setResult] = useState<Dass21Result | null>(null);
+  const [isOfflineResult, setIsOfflineResult] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,12 +96,32 @@ export const Dass21Wizard: React.FC<Dass21WizardProps> = ({
     }
     setIsLoading(true);
     setError(null);
+
+    // Jika sedang offline, hitung langsung secara deterministik di peramban
+    if (!navigator.onLine) {
+      const localRes = offlineStorage.processDass21Offline(answers);
+      setResult(localRes);
+      setIsOfflineResult(true);
+      setIsLoading(false);
+      if (onComplete) onComplete(localRes);
+      return;
+    }
+
     try {
       const res = await api.submitDass21(answers, token);
+      offlineStorage.saveDass21Online(answers, res);
       setResult(res);
+      setIsOfflineResult(false);
       if (onComplete) onComplete(res);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal memproses instrumen DASS-21');
+      console.warn(
+        'API DASS-21 gagal, beralih ke kalkulasi deterministik luring (client-side):',
+        err,
+      );
+      const localRes = offlineStorage.processDass21Offline(answers);
+      setResult(localRes);
+      setIsOfflineResult(true);
+      if (onComplete) onComplete(localRes);
     } finally {
       setIsLoading(false);
     }
@@ -108,6 +131,7 @@ export const Dass21Wizard: React.FC<Dass21WizardProps> = ({
     setAnswers(Array(21).fill(-1));
     setCurrentIndex(0);
     setResult(null);
+    setIsOfflineResult(false);
     setError(null);
   };
 
@@ -142,6 +166,22 @@ export const Dass21Wizard: React.FC<Dass21WizardProps> = ({
             </p>
           </div>
         </div>
+
+        {isOfflineResult && (
+          <div className="mb-6 p-4 bg-amber-50/90 border border-amber-200 rounded-xl flex items-start gap-3">
+            <WifiOff className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+            <div>
+              <h4 className="text-sm font-bold text-amber-900">
+                Mode Hemat Sinyal / Offline Aktif
+              </h4>
+              <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
+                Skor DASS-21 Anda berhasil dihitung 100% secara matematis di peramban dan tersimpan
+                aman di cache lokal perangkat Anda. Data ini akan disinkronkan otomatis begitu
+                jaringan terhubung kembali.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* 3 Subscale Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">

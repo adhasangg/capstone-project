@@ -7,6 +7,8 @@ interface NavbarProps {
   readonly onSelectTab: (tab: string) => void;
   readonly session: AuthSession | null;
   readonly onLogout: () => void;
+  readonly isOnline?: boolean;
+  readonly unsyncedCount?: number;
 }
 
 interface NavLinksProps {
@@ -37,6 +39,17 @@ const PublicNavLinks: React.FC<NavLinksProps> = ({ currentTab, onSelectTab }) =>
       }`}
     >
       Tentang SafeSpace
+    </button>
+    <button
+      type="button"
+      onClick={() => onSelectTab('docs')}
+      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+        currentTab === 'docs'
+          ? 'bg-[#E3ECE5] text-[#31523A]'
+          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+      }`}
+    >
+      Panduan Aplikasi
     </button>
   </>
 );
@@ -76,21 +89,45 @@ const StudentNavLinks: React.FC<NavLinksProps> = ({ currentTab, onSelectTab }) =
     >
       Curhat Refleksi
     </button>
+    <button
+      type="button"
+      onClick={() => onSelectTab('docs')}
+      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+        currentTab === 'docs'
+          ? 'bg-[#E3ECE5] text-[#31523A]'
+          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+      }`}
+    >
+      Panduan
+    </button>
   </>
 );
 
 const CounselorNavLinks: React.FC<NavLinksProps> = ({ currentTab, onSelectTab }) => (
-  <button
-    type="button"
-    onClick={() => onSelectTab('counselor-queue')}
-    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-      currentTab === 'counselor-queue'
-        ? 'bg-[#D9E2EC] text-[#24365D]'
-        : 'text-[#3B5998] hover:bg-[#F0F4F8]'
-    }`}
-  >
-    Antrean Triage Konselor
-  </button>
+  <>
+    <button
+      type="button"
+      onClick={() => onSelectTab('counselor-queue')}
+      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+        currentTab === 'counselor-queue'
+          ? 'bg-[#D9E2EC] text-[#24365D]'
+          : 'text-[#3B5998] hover:bg-[#F0F4F8]'
+      }`}
+    >
+      Antrean Triage Konselor
+    </button>
+    <button
+      type="button"
+      onClick={() => onSelectTab('docs')}
+      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+        currentTab === 'docs'
+          ? 'bg-[#D9E2EC] text-[#24365D]'
+          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+      }`}
+    >
+      Panduan
+    </button>
+  </>
 );
 
 const AdminNavLinks: React.FC<NavLinksProps> = ({ currentTab, onSelectTab }) => (
@@ -127,6 +164,17 @@ const AdminNavLinks: React.FC<NavLinksProps> = ({ currentTab, onSelectTab }) => 
       }`}
     >
       Simulasi Mahasiswa
+    </button>
+    <button
+      type="button"
+      onClick={() => onSelectTab('docs')}
+      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+        currentTab === 'docs'
+          ? 'bg-purple-100 text-purple-800'
+          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+      }`}
+    >
+      Panduan
     </button>
   </>
 );
@@ -171,7 +219,7 @@ const MobileNav: React.FC<{
         <button
           type="button"
           onClick={() => onSelectTab('home')}
-          className={`px-3 py-1.5 rounded cursor-pointer ${
+          className={`px-2 py-1.5 rounded cursor-pointer ${
             currentTab === 'home' ? 'text-[#4A7C59] font-bold' : 'text-slate-600'
           }`}
         >
@@ -180,18 +228,27 @@ const MobileNav: React.FC<{
         <button
           type="button"
           onClick={() => onSelectTab('about')}
-          className={`px-3 py-1.5 rounded cursor-pointer ${
+          className={`px-2 py-1.5 rounded cursor-pointer ${
             currentTab === 'about' ? 'text-[#4A7C59] font-bold' : 'text-slate-600'
           }`}
         >
-          Tentang SafeSpace
+          Tentang
+        </button>
+        <button
+          type="button"
+          onClick={() => onSelectTab('docs')}
+          className={`px-2 py-1.5 rounded cursor-pointer ${
+            currentTab === 'docs' ? 'text-[#4A7C59] font-bold' : 'text-slate-600'
+          }`}
+        >
+          Panduan
         </button>
         <button
           type="button"
           onClick={() => onSelectTab('auth')}
-          className="px-3 py-1.5 rounded bg-[#4A7C59] text-white font-semibold cursor-pointer"
+          className="px-2.5 py-1.5 rounded bg-[#4A7C59] text-white font-semibold cursor-pointer"
         >
-          Masuk / Daftar
+          Masuk
         </button>
       </div>
     );
@@ -221,19 +278,39 @@ const MobileNav: React.FC<{
           >
             Antrean
           </button>
+          <button
+            type="button"
+            onClick={() => onSelectTab('docs')}
+            className={`px-2 py-1 rounded cursor-pointer ${
+              currentTab === 'docs' ? 'text-purple-700 font-bold' : 'text-slate-600'
+            }`}
+          >
+            Panduan
+          </button>
         </>
       )}
 
       {role === 'counselor' && (
-        <button
-          type="button"
-          onClick={() => onSelectTab('counselor-queue')}
-          className={`px-3 py-1 rounded cursor-pointer ${
-            currentTab === 'counselor-queue' ? 'text-[#3B5998] font-bold' : 'text-slate-600'
-          }`}
-        >
-          Antrean Konseling
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={() => onSelectTab('counselor-queue')}
+            className={`px-3 py-1 rounded cursor-pointer ${
+              currentTab === 'counselor-queue' ? 'text-[#3B5998] font-bold' : 'text-slate-600'
+            }`}
+          >
+            Antrean Konseling
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectTab('docs')}
+            className={`px-3 py-1 rounded cursor-pointer ${
+              currentTab === 'docs' ? 'text-[#3B5998] font-bold' : 'text-slate-600'
+            }`}
+          >
+            Panduan
+          </button>
+        </>
       )}
 
       {role === 'student' && (
@@ -265,13 +342,29 @@ const MobileNav: React.FC<{
           >
             Curhat
           </button>
+          <button
+            type="button"
+            onClick={() => onSelectTab('docs')}
+            className={`px-2 py-1 rounded cursor-pointer ${
+              currentTab === 'docs' ? 'text-[#4A7C59] font-bold' : 'text-slate-600'
+            }`}
+          >
+            Panduan
+          </button>
         </>
       )}
     </div>
   );
 };
 
-export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, session, onLogout }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  currentTab,
+  onSelectTab,
+  session,
+  onLogout,
+  isOnline = true,
+  unsyncedCount = 0,
+}) => {
   const handleSafeExit = () => {
     window.location.replace('https://www.google.com');
   };
@@ -334,8 +427,36 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, session
             )}
           </nav>
 
-          {/* Header Kanan: Status Akun, Tombol Masuk/Daftar & Safe Exit */}
-          <div className="flex items-center gap-2.5">
+          {/* Header Kanan: Status Akun, Status Koneksi, Tombol Masuk/Daftar & Safe Exit */}
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            {/* Online / Offline Status Badge */}
+            {isOnline ? (
+              <div
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full text-[11px] font-semibold"
+                title="Aplikasi terhubung ke internet dan tersinkronisasi"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                <span>Online</span>
+              </div>
+            ) : (
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-full text-[11px] font-semibold"
+                title="Aplikasi berjalan dalam mode hemat sinyal / offline. Asesmen tetap dapat dihitung secara deterministik di perangkat."
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+                <span>Mode Offline</span>
+              </div>
+            )}
+
+            {unsyncedCount > 0 && (
+              <div
+                className="hidden sm:flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-full text-[10px] font-bold"
+                title={`${unsyncedCount} asesmen tersimpan di perangkat menunggu sinkronisasi`}
+              >
+                <span>{unsyncedCount} antrean</span>
+              </div>
+            )}
+
             {!session && (
               <button
                 type="button"

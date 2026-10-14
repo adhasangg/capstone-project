@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const { marked } = require('marked');
 const katex = require('katex');
 const { chromium } = require('playwright');
@@ -62,7 +62,7 @@ const mermaidJs = fs.existsSync(mermaidJsPath) ? fs.readFileSync(mermaidJsPath, 
 // Configure marked with custom renderer
 const renderer = new marked.Renderer();
 
-renderer.code = function({ text, lang }) {
+renderer.code = ({ text, lang }) => {
   if (lang === 'mermaid') {
     return `<div class="mermaid-wrapper"><pre class="mermaid">${text}</pre></div>`;
   }
@@ -85,7 +85,7 @@ function processMath(markdownText) {
   let processed = markdownText.replace(/\$\$([\s\S]+?)\$\$/g, (match, formula) => {
     try {
       return `<div class="math-block">${katex.renderToString(formula.trim(), { displayMode: true, throwOnError: false })}</div>`;
-    } catch (e) {
+    } catch (_e) {
       return match;
     }
   });
@@ -94,7 +94,7 @@ function processMath(markdownText) {
   processed = processed.replace(/(?<!\\)\$([^\$\n]+?)(?<!\\)\$/g, (match, formula) => {
     try {
       return katex.renderToString(formula.trim(), { displayMode: false, throwOnError: false });
-    } catch (e) {
+    } catch (_e) {
       return match;
     }
   });

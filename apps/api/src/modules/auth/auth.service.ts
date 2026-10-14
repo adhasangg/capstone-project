@@ -1,4 +1,9 @@
-import { generatePseudonym, hashIdentity, isAllowedEmailDomain } from '@safespace/shared';
+import {
+  type UserRole,
+  generatePseudonym,
+  hashIdentity,
+  isAllowedEmailDomain,
+} from '@safespace/shared';
 import type { IAuthRepository } from './auth.repository';
 import type { AuthenticatedUser, GoogleTokenPayload, TokenVerifier } from './auth.types';
 

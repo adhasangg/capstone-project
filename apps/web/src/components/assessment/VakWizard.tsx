@@ -10,10 +10,12 @@ import {
   Move,
   RefreshCw,
   Sparkles,
+  WifiOff,
 } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { api } from '../../services/api';
+import { offlineStorage } from '../../services/offlineStorage';
 
 interface VakScenario {
   scenario: string;
@@ -280,6 +282,7 @@ export const VakWizard: React.FC<VakWizardProps> = ({ onComplete, token }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<VakModality[]>([]);
   const [result, setResult] = useState<VakResult | null>(null);
+  const [isOfflineResult, setIsOfflineResult] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -300,12 +303,29 @@ export const VakWizard: React.FC<VakWizardProps> = ({ onComplete, token }) => {
     }
     setIsLoading(true);
     setError(null);
+
+    // Jika sedang offline, hitung langsung secara deterministik di peramban
+    if (!navigator.onLine) {
+      const localRes = offlineStorage.processVakOffline(answers);
+      setResult(localRes);
+      setIsOfflineResult(true);
+      setIsLoading(false);
+      if (onComplete) onComplete(localRes);
+      return;
+    }
+
     try {
       const res = await api.submitVak(answers, token);
+      offlineStorage.saveVakOnline(answers, res);
       setResult(res);
+      setIsOfflineResult(false);
       if (onComplete) onComplete(res);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal memproses instrumen VAK');
+      console.warn('API VAK gagal, beralih ke kalkulasi deterministik luring (client-side):', err);
+      const localRes = offlineStorage.processVakOffline(answers);
+      setResult(localRes);
+      setIsOfflineResult(true);
+      if (onComplete) onComplete(localRes);
     } finally {
       setIsLoading(false);
     }
@@ -315,6 +335,7 @@ export const VakWizard: React.FC<VakWizardProps> = ({ onComplete, token }) => {
     setAnswers([]);
     setCurrentIndex(0);
     setResult(null);
+    setIsOfflineResult(false);
     setError(null);
   };
 
@@ -347,6 +368,22 @@ export const VakWizard: React.FC<VakWizardProps> = ({ onComplete, token }) => {
             </p>
           </div>
         </div>
+
+        {isOfflineResult && (
+          <div className="mb-6 p-4 bg-amber-50/90 border border-amber-200 rounded-xl flex items-start gap-3">
+            <WifiOff className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+            <div>
+              <h4 className="text-sm font-bold text-amber-900">
+                Mode Hemat Sinyal / Offline Aktif
+              </h4>
+              <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
+                Skor modalitas belajar VAK Anda berhasil dihitung 100% secara matematis di peramban
+                dan tersimpan aman di cache lokal perangkat Anda. Tips belajar LMS tetap dapat
+                diakses penuh secara offline.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Dominance Badge */}
         <div className="p-4 rounded-xl bg-gradient-to-r from-[#E3ECE5] to-[#D9E2EC] border border-[#C7D9CC] mb-6 text-center">

@@ -16,6 +16,7 @@ import {
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { type AuthSession, api } from '../../services/api';
+import { offlineStorage } from '../../services/offlineStorage';
 
 interface StudentDashboardProps {
   session: AuthSession;
@@ -32,6 +33,9 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   onNavigateAssessment,
   onEnterChat,
 }) => {
+  const activeDass21 = dass21Result || offlineStorage.getLatestDass21()?.result || null;
+  const activeVak = vakResult || offlineStorage.getLatestVak()?.result || null;
+
   const [sessions, setSessions] = useState<CounselingSessionSummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingTicket, setIsCreatingTicket] = useState(false);
@@ -60,8 +64,8 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
     setTicketSuccess(null);
     try {
       const newSession = await api.createTicket(session.token, {
-        dass21Result: dass21Result ?? undefined,
-        vakResult: vakResult ?? undefined,
+        dass21Result: activeDass21 ?? undefined,
+        vakResult: activeVak ?? undefined,
       });
       setTicketSuccess(`Tiket sesi pra-konseling #${newSession.id.slice(0, 8)} berhasil dibuka!`);
       await loadSessions();
@@ -169,14 +173,14 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   <span className="text-[11px] text-slate-500">Kondisi 1 Minggu Terakhir</span>
                 </div>
               </div>
-              {dass21Result && (
+              {activeDass21 && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-[#F4F6F3] text-slate-700">
-                  Resiko: <strong>{getBurnoutRiskLevel(dass21Result)}</strong>
+                  Resiko: <strong>{getBurnoutRiskLevel(activeDass21)}</strong>
                 </span>
               )}
             </div>
 
-            {dass21Result ? (
+            {activeDass21 ? (
               <div className="space-y-3">
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div className="p-3 bg-[#F9F9F6] rounded-xl border border-slate-100">
@@ -184,10 +188,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                       Depresi
                     </span>
                     <span className="text-lg font-bold text-[#1E293B]">
-                      {dass21Result.depression.multipliedScore}
+                      {activeDass21.depression.multipliedScore}
                     </span>
                     <span className="text-[10px] block font-medium text-slate-600">
-                      {dass21Result.depression.category}
+                      {activeDass21.depression.category}
                     </span>
                   </div>
                   <div className="p-3 bg-[#F9F9F6] rounded-xl border border-slate-100">
@@ -195,10 +199,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                       Kecemasan
                     </span>
                     <span className="text-lg font-bold text-[#1E293B]">
-                      {dass21Result.anxiety.multipliedScore}
+                      {activeDass21.anxiety.multipliedScore}
                     </span>
                     <span className="text-[10px] block font-medium text-slate-600">
-                      {dass21Result.anxiety.category}
+                      {activeDass21.anxiety.category}
                     </span>
                   </div>
                   <div className="p-3 bg-[#F9F9F6] rounded-xl border border-slate-100">
@@ -206,10 +210,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                       Stres
                     </span>
                     <span className="text-lg font-bold text-[#1E293B]">
-                      {dass21Result.stress.multipliedScore}
+                      {activeDass21.stress.multipliedScore}
                     </span>
                     <span className="text-[10px] block font-medium text-slate-600">
-                      {dass21Result.stress.category}
+                      {activeDass21.stress.category}
                     </span>
                   </div>
                 </div>
@@ -234,7 +238,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             )}
           </div>
 
-          {dass21Result && (
+          {activeDass21 && (
             <div className="pt-4 border-t border-slate-100 mt-4 flex justify-end">
               <button
                 type="button"
@@ -261,26 +265,26 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   <span className="text-[11px] text-slate-500">Pedagogical Exit Strategy</span>
                 </div>
               </div>
-              {vakResult && (
+              {activeVak && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-[#D9E2EC] text-[#24365D] uppercase">
-                  {vakResult.dominantStyle}
+                  {activeVak.dominantStyle}
                 </span>
               )}
             </div>
 
-            {vakResult ? (
+            {activeVak ? (
               <div className="space-y-3">
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-[#4A7C59] flex items-center gap-1">
                       <BookOpen className="w-3 h-3" /> Visual
                     </span>
-                    <span>{vakResult.visual.percentage}%</span>
+                    <span>{activeVak.visual.percentage}%</span>
                   </div>
                   <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[#4A7C59] rounded-full"
-                      style={{ width: `${vakResult.visual.percentage}%` }}
+                      style={{ width: `${activeVak.visual.percentage}%` }}
                     />
                   </div>
 
@@ -288,12 +292,12 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                     <span className="text-[#3B5998] flex items-center gap-1">
                       <Headphones className="w-3 h-3" /> Auditori
                     </span>
-                    <span>{vakResult.auditory.percentage}%</span>
+                    <span>{activeVak.auditory.percentage}%</span>
                   </div>
                   <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[#3B5998] rounded-full"
-                      style={{ width: `${vakResult.auditory.percentage}%` }}
+                      style={{ width: `${activeVak.auditory.percentage}%` }}
                     />
                   </div>
 
@@ -301,12 +305,12 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                     <span className="text-[#D97706] flex items-center gap-1">
                       <Move className="w-3 h-3" /> Kinestetik
                     </span>
-                    <span>{vakResult.kinesthetic.percentage}%</span>
+                    <span>{activeVak.kinesthetic.percentage}%</span>
                   </div>
                   <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[#D97706] rounded-full"
-                      style={{ width: `${vakResult.kinesthetic.percentage}%` }}
+                      style={{ width: `${activeVak.kinesthetic.percentage}%` }}
                     />
                   </div>
                 </div>
@@ -315,13 +319,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   <strong className="block mb-1">
                     Tips Adaptif untuk Pembelajaran Mandiri PJJ:
                   </strong>
-                  {vakResult.dominantStyle === 'visual' &&
+                  {activeVak.dominantStyle === 'visual' &&
                     'Gunakan teknik Mind Mapping dan stabilo saat membaca modul dan materi digital di ruang baca online.'}
-                  {vakResult.dominantStyle === 'auditory' &&
+                  {activeVak.dominantStyle === 'auditory' &&
                     'Aktifkan rekaman audio/webinar kuliah dan dengarkan ulang saat perjalanan komuter kerja.'}
-                  {vakResult.dominantStyle === 'kinesthetic' &&
+                  {activeVak.dominantStyle === 'kinesthetic' &&
                     'Terapkan metode Pomodoro 25 menit diselingi peregangan fisik agar terhindar dari kelesuan saat belajar mandiri.'}
-                  {vakResult.dominantStyle === 'multimodal' &&
+                  {activeVak.dominantStyle === 'multimodal' &&
                     'Kombinasikan catatan visual dan pemutaran audio modul untuk materi dengan tingkat kompleksitas tinggi.'}
                 </div>
               </div>
@@ -341,7 +345,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             )}
           </div>
 
-          {vakResult && (
+          {activeVak && (
             <div className="pt-4 border-t border-slate-100 mt-4 flex justify-end">
               <button
                 type="button"

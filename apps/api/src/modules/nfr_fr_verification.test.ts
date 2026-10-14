@@ -123,23 +123,19 @@ describe('System Verification: Functional & Non-Functional Requirements (FR & NF
 
     it('MUST ensure session ticketing stores only pseudonym and attached profile without PII', async () => {
       const dassScore: Dass21Result = {
-        depression: 18,
-        anxiety: 14,
-        stress: 22,
-        depressionCategory: 'Severe',
-        anxietyCategory: 'Severe',
-        stressCategory: 'Severe',
-        burnoutRiskLevel: 'High',
+        depression: { rawScore: 9, multipliedScore: 18, category: 'Severe' },
+        anxiety: { rawScore: 7, multipliedScore: 14, category: 'Severe' },
+        stress: { rawScore: 11, multipliedScore: 22, category: 'Severe' },
+        completedAt: new Date().toISOString(),
       };
 
       const vakScore: VakResult = {
-        visualScore: 8,
-        auditoryScore: 2,
-        kinestheticScore: 2,
-        visualPercentage: 67,
-        auditoryPercentage: 17,
-        kinestheticPercentage: 17,
-        dominantModality: 'visual',
+        visual: { count: 8, percentage: 67 },
+        auditory: { count: 2, percentage: 17 },
+        kinesthetic: { count: 2, percentage: 17 },
+        dominantStyle: 'visual',
+        totalQuestionsAnswered: 12,
+        completedAt: new Date().toISOString(),
       };
 
       const ticket = await sessionRepo.createSession({
