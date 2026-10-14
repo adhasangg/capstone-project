@@ -12,6 +12,14 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'safespace-logo.svg'],
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api/, /^\/health/, /^\/swagger/],
+      },
       manifest: {
         name: 'SafeSpace PWA: Pra-Konseling Anonim',
         short_name: 'SafeSpace',
