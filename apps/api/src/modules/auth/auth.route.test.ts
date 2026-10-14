@@ -122,4 +122,22 @@ describe('Auth Route Integration Tests', () => {
 
     expect(response.status).toBe(401);
   });
+
+  it('GET /api/auth/config should return auth configuration and sandbox status', async () => {
+    const response = await app.handle(
+      new Request('http://localhost/api/auth/config', {
+        method: 'GET',
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      success: boolean;
+      data: { enableSandbox: boolean; googleClientId: string };
+    };
+    expect(body.success).toBe(true);
+    expect(typeof body.data.enableSandbox).toBe('boolean');
+    expect(typeof body.data.googleClientId).toBe('string');
+  });
 });
+

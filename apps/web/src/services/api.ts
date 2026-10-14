@@ -21,6 +21,22 @@ export interface AuthSession {
 
 export const api = {
   // Auth
+  async getAuthConfig(): Promise<{ enableSandbox: boolean; googleClientId: string }> {
+    try {
+      const res = await fetch(`${BASE_URL}/auth/config`);
+      if (!res.ok) throw new Error('Failed to fetch auth config');
+      const json: ApiResponse<{ enableSandbox: boolean; googleClientId: string }> =
+        await res.json();
+      if (!json.success || !json.data) throw new Error('Invalid auth config response');
+      return json.data;
+    } catch {
+      return {
+        enableSandbox: false,
+        googleClientId: '917155815665-km4ltep9rafa9ogn3noc56oa55j5bhd7.apps.googleusercontent.com',
+      };
+    }
+  },
+
   async loginWithGoogleToken(idToken: string): Promise<AuthSession> {
     const res = await fetch(`${BASE_URL}/auth/google`, {
       method: 'POST',

@@ -78,6 +78,8 @@ export function createServerApp() {
       createAuthRoute({
         authService,
         jwtSecret: config.jwtSecret,
+        enableSandbox: config.enableSandbox,
+        googleClientId: config.googleClientId,
       }),
     )
     .use(

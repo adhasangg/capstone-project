@@ -151,12 +151,41 @@ export const GoogleOAuthCard: React.FC<GoogleOAuthCardProps> = ({ onLoginSuccess
     return () => clearInterval(interval);
   }, [clientId, handleCredential]);
 
+  const [sandboxAllowed, setSandboxAllowed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return Boolean(import.meta.env.DEV && import.meta.env.VITE_ENABLE_SANDBOX === 'true');
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    api
+      .getAuthConfig()
+      .then((cfg) => {
+        if (isMounted) {
+          setSandboxAllowed(cfg.enableSandbox);
+          if (cfg.googleClientId) {
+            setClientId((prev) => prev || cfg.googleClientId);
+          }
+        }
+      })
+      .catch(() => {
+        // Tetap gunakan default aman (false pada production)
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleCustomGoogleClick = () => {
     const activeId = clientId.trim() || DEFAULT_GOOGLE_CLIENT_ID;
     if (window.google?.accounts?.id && activeId) {
       window.google.accounts.id.prompt();
     } else {
-      setShowConfig(true);
+      if (sandboxAllowed) {
+        setShowConfig(true);
+      } else {
+        setErrorMsg('Layanan Google Sign-In sedang dimuat... Silakan klik ulang atau muat ulang peramban Anda.');
+      }
     }
   };
 
@@ -178,8 +207,6 @@ export const GoogleOAuthCard: React.FC<GoogleOAuthCardProps> = ({ onLoginSuccess
     setClientId(val);
     localStorage.setItem('safespace_google_client_id', val.trim());
   };
-
-  const isSandboxEnvAllowed = import.meta.env.VITE_ENABLE_SANDBOX !== 'false';
 
   const [sandboxUnlocked, setSandboxUnlocked] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -281,8 +308,8 @@ export const GoogleOAuthCard: React.FC<GoogleOAuthCardProps> = ({ onLoginSuccess
             </button>
           )}
 
-          {/* Sandbox & Role-based Quick Login (Only available in non-production, locked by default) */}
-          {isSandboxEnvAllowed && (
+          {/* Sandbox & Role-based Quick Login (Hanya tersedia jika backend mengizinkan mode sandbox) */}
+          {sandboxAllowed && (
             <div className="pt-2 border-t border-slate-100">
               {sandboxUnlocked ? (
                 <div>
@@ -404,42 +431,44 @@ export const GoogleOAuthCard: React.FC<GoogleOAuthCardProps> = ({ onLoginSuccess
         </div>
       )}
 
-      {/* Collapsible Client ID Configuration */}
-      <div className="pt-1">
-        <button
-          type="button"
-          onClick={() => setShowConfig(!showConfig)}
-          className="text-[11px] text-slate-500 hover:text-slate-700 flex items-center gap-1 cursor-pointer font-medium"
-        >
-          <KeyRound className="w-3 h-3 text-slate-400" />
-          <span>{showConfig ? 'Sembunyikan' : 'Konfigurasi'} Google Cloud Client ID</span>
-          {showConfig ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-        </button>
+      {/* Collapsible Client ID Configuration (Hanya tampil pada mode Sandbox / Evaluator) */}
+      {sandboxAllowed && (
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={() => setShowConfig(!showConfig)}
+            className="text-[11px] text-slate-500 hover:text-slate-700 flex items-center gap-1 cursor-pointer font-medium"
+          >
+            <KeyRound className="w-3 h-3 text-slate-400" />
+            <span>{showConfig ? 'Sembunyikan' : 'Konfigurasi'} Google Cloud Client ID</span>
+            {showConfig ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </button>
 
-        {showConfig && (
-          <div className="mt-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
-            <label
-              htmlFor="google-client-id-input"
-              className="block text-[11px] font-medium text-slate-600"
-            >
-              Google OAuth Client ID (.apps.googleusercontent.com):
-            </label>
-            <input
-              id="google-client-id-input"
-              type="text"
-              value={clientId}
-              onChange={(e) => handleSaveClientId(e.target.value)}
-              placeholder="1234567890-xxx.apps.googleusercontent.com"
-              className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 font-mono focus:outline-none focus:ring-1 focus:ring-[#4A7C59]"
-            />
-            <p className="text-[10px] text-slate-400 leading-normal">
-              Masukkan Client ID dari Google Cloud Console dengan Authorized JavaScript Origins set
-              ke <code className="text-slate-600 font-bold">http://localhost:5173</code>. Client ID
-              akan disimpan di browser lokal Anda.
-            </p>
-          </div>
-        )}
-      </div>
+          {showConfig && (
+            <div className="mt-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
+              <label
+                htmlFor="google-client-id-input"
+                className="block text-[11px] font-medium text-slate-600"
+              >
+                Google OAuth Client ID (.apps.googleusercontent.com):
+              </label>
+              <input
+                id="google-client-id-input"
+                type="text"
+                value={clientId}
+                onChange={(e) => handleSaveClientId(e.target.value)}
+                placeholder="1234567890-xxx.apps.googleusercontent.com"
+                className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 font-mono focus:outline-none focus:ring-1 focus:ring-[#4A7C59]"
+              />
+              <p className="text-[10px] text-slate-400 leading-normal">
+                Masukkan Client ID dari Google Cloud Console dengan Authorized JavaScript Origins set
+                ke <code className="text-slate-600 font-bold">http://localhost:5173</code>. Client ID
+                akan disimpan di browser lokal Anda.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Footer Assurance */}
       <div className="flex items-center gap-2 pt-2 border-t border-slate-100 text-[11px] text-slate-400">

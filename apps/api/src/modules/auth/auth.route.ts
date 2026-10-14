@@ -7,6 +7,8 @@ import type { AuthSessionResponse, AuthenticatedUser } from './auth.types';
 export interface AuthRouteOptions {
   readonly authService: AuthService;
   readonly jwtSecret: string;
+  readonly enableSandbox?: boolean;
+  readonly googleClientId?: string;
 }
 
 interface JwtAuthPayload {
@@ -45,7 +47,12 @@ async function resolveAuthPayload(
   return null;
 }
 
-export function createAuthRoute({ authService, jwtSecret }: AuthRouteOptions) {
+export function createAuthRoute({
+  authService,
+  jwtSecret,
+  enableSandbox = false,
+  googleClientId,
+}: AuthRouteOptions) {
   return new Elysia({ prefix: '/api/auth' })
     .use(
       jwt({
@@ -54,6 +61,18 @@ export function createAuthRoute({ authService, jwtSecret }: AuthRouteOptions) {
         exp: '7d',
       }),
     )
+    .get('/config', (): ApiResponse<{ enableSandbox: boolean; googleClientId: string }> => {
+      return {
+        success: true,
+        data: {
+          enableSandbox: Boolean(enableSandbox),
+          googleClientId:
+            googleClientId ||
+            '917155815665-km4ltep9rafa9ogn3noc56oa55j5bhd7.apps.googleusercontent.com',
+        },
+        message: 'Auth configuration retrieved',
+      };
+    })
     .post(
       '/google',
       async ({ body, jwt, set }): Promise<ApiResponse<AuthSessionResponse>> => {
