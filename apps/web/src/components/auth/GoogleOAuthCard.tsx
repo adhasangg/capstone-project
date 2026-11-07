@@ -1,11 +1,4 @@
-import {
-  AlertCircle,
-  KeyRound,
-  Loader2,
-  Lock,
-  Shield,
-  Users,
-} from 'lucide-react';
+import { AlertCircle, KeyRound, Loader2, Lock, Shield, Users } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { type AuthSession, api } from '../../services/api';

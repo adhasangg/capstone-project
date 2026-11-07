@@ -124,7 +124,20 @@ export class AuthService {
 
     const existingUser = await this.repo.findByHashedIdentity(hashedIdentity);
     if (existingUser) {
-      const activeRole = existingUser.role === 'admin' ? 'admin' : determinedRole;
+      // Prioritas 1: Daftar putih .env ADMIN_EMAILS selalu memiliki hak Sysadmin
+      // Prioritas 2: Peran yang tersimpan di basis data (misal: dielevasi ke konselor/admin oleh Sysadmin)
+      // Prioritas 3: Daftar putih .env COUNSELOR_EMAILS untuk pengguna berstatus student di basis data
+      let activeRole: UserRole = existingUser.role;
+      if (determinedRole === 'admin') {
+        activeRole = 'admin';
+      } else if (existingUser.role === 'student' && determinedRole === 'counselor') {
+        activeRole = 'counselor';
+      }
+
+      if (activeRole !== existingUser.role) {
+        await this.repo.updateRole(existingUser.id, activeRole);
+      }
+
       return {
         id: existingUser.id,
         role: activeRole,

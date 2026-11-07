@@ -98,6 +98,20 @@ describe('AuthService (TDD)', () => {
 
       expect(firstLogin.id).toBe(secondLogin.id);
     });
+
+    it('should preserve counselor role when student is elevated by sysadmin and logs in again', async () => {
+      const initialUser = await service.authenticateWithGoogle('valid-ut-token');
+      expect(initialUser.role).toBe('student');
+
+      // Sysadmin elevates this account to counselor in DB
+      await mockRepo.updateRole(initialUser.id, 'counselor');
+
+      // User logs in again via Google OAuth
+      const elevatedUser = await service.authenticateWithGoogle('valid-ut-token');
+      expect(elevatedUser.id).toBe(initialUser.id);
+      expect(elevatedUser.role).toBe('counselor');
+      expect(elevatedUser.pseudonym.startsWith('Konselor #')).toBe(true);
+    });
   });
 
   describe('Error Path', () => {

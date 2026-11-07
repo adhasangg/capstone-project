@@ -181,6 +181,7 @@ test.describe('SafeSpace PWA: End-to-End System Integration Flow', () => {
     // Step 4: Logout and switch role to Counselor
     const logoutBtn = page.locator('button[title="Keluar dari sesi"]');
     await logoutBtn.click();
+    await expect(logoutBtn).toHaveCount(0);
 
     // Go to Auth page and choose "Konselor"
     await page.goto('/#/auth');

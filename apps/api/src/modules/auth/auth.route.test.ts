@@ -92,10 +92,32 @@ describe('Auth Route Integration Tests', () => {
     expect(meResponse.status).toBe(200);
     const meBody = (await meResponse.json()) as {
       success: boolean;
-      data: { id: string; role: string; pseudonym: string };
+      data: { id: string; role: string; pseudonym: string; token: string };
     };
     expect(meBody.success).toBe(true);
     expect(meBody.data.id).toBe(body.data.user.id);
+    expect(meBody.data.role).toBe('student');
+    expect(meBody.data.token).toBeDefined();
+
+    // Now simulate Sysadmin elevating user role to counselor in repository
+    await mockRepo.updateRole(body.data.user.id, 'counselor');
+
+    // Calling GET /api/auth/me should immediately return updated role and fresh counselor token
+    const refreshedMeResponse = await app.handle(
+      new Request('http://localhost/api/auth/me', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${body.data.token}` },
+      }),
+    );
+    expect(refreshedMeResponse.status).toBe(200);
+    const refreshedMeBody = (await refreshedMeResponse.json()) as {
+      success: boolean;
+      data: { id: string; role: string; pseudonym: string; token: string };
+    };
+    expect(refreshedMeBody.success).toBe(true);
+    expect(refreshedMeBody.data.role).toBe('counselor');
+    expect(refreshedMeBody.data.token).toBeDefined();
+    expect(refreshedMeBody.data.token).not.toBe(body.data.token);
   });
 
   it('POST /api/auth/google should return 400 for invalid token', async () => {
@@ -140,4 +162,3 @@ describe('Auth Route Integration Tests', () => {
     expect(typeof body.data.googleClientId).toBe('string');
   });
 });
-

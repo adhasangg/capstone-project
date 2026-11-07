@@ -134,28 +134,6 @@ const AdminNavLinks: React.FC<NavLinksProps> = ({ currentTab, onSelectTab }) => 
     </button>
     <button
       type="button"
-      onClick={() => onSelectTab('counselor-queue')}
-      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-        currentTab === 'counselor-queue'
-          ? 'bg-[#D9E2EC] text-[#24365D]'
-          : 'text-[#3B5998] hover:bg-[#F0F4F8]'
-      }`}
-    >
-      Antrean Konseling
-    </button>
-    <button
-      type="button"
-      onClick={() => onSelectTab('dashboard')}
-      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-        currentTab === 'dashboard'
-          ? 'bg-[#E3ECE5] text-[#31523A]'
-          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-      }`}
-    >
-      Simulasi Mahasiswa
-    </button>
-    <button
-      type="button"
       onClick={() => onSelectTab('docs')}
       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
         currentTab === 'docs'
@@ -248,17 +226,6 @@ const MobileNav: React.FC<{
           </button>
           <button
             type="button"
-            onClick={() => onSelectTab('counselor-queue')}
-            className={`px-2.5 py-1 rounded-lg cursor-pointer transition-colors ${
-              currentTab === 'counselor-queue'
-                ? 'text-[#24365D] bg-[#D9E2EC] font-bold'
-                : 'text-slate-600'
-            }`}
-          >
-            Antrean
-          </button>
-          <button
-            type="button"
             onClick={() => onSelectTab('docs')}
             className={`px-2.5 py-1 rounded-lg cursor-pointer transition-colors ${
               currentTab === 'docs' ? 'text-purple-800 bg-purple-50 font-bold' : 'text-slate-600'
@@ -286,9 +253,7 @@ const MobileNav: React.FC<{
             type="button"
             onClick={() => onSelectTab('docs')}
             className={`px-3 py-1 rounded-lg cursor-pointer transition-colors ${
-              currentTab === 'docs'
-                ? 'text-[#24365D] bg-[#D9E2EC] font-bold'
-                : 'text-slate-600'
+              currentTab === 'docs' ? 'text-[#24365D] bg-[#D9E2EC] font-bold' : 'text-slate-600'
             }`}
           >
             Panduan Konselor
@@ -324,9 +289,7 @@ const MobileNav: React.FC<{
             type="button"
             onClick={() => onSelectTab('mood')}
             className={`px-2.5 py-1 rounded-lg cursor-pointer transition-colors ${
-              currentTab === 'mood'
-                ? 'text-[#31523A] bg-[#E3ECE5] font-bold'
-                : 'text-slate-600'
+              currentTab === 'mood' ? 'text-[#31523A] bg-[#E3ECE5] font-bold' : 'text-slate-600'
             }`}
           >
             Curhat
@@ -335,9 +298,7 @@ const MobileNav: React.FC<{
             type="button"
             onClick={() => onSelectTab('docs')}
             className={`px-2.5 py-1 rounded-lg cursor-pointer transition-colors ${
-              currentTab === 'docs'
-                ? 'text-[#31523A] bg-[#E3ECE5] font-bold'
-                : 'text-slate-600'
+              currentTab === 'docs' ? 'text-[#31523A] bg-[#E3ECE5] font-bold' : 'text-slate-600'
             }`}
           >
             Panduan
@@ -455,8 +416,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 bg-[#4A7C59] hover:bg-[#3D6649] text-white text-xs font-semibold rounded-lg transition-colors shadow-2xs cursor-pointer shrink-0"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline">Masuk / Daftar</span>
-                <span className="xs:hidden">Masuk</span>
+                <span className="hidden sm:inline">Masuk / Daftar</span>
+                <span className="sm:hidden">Masuk</span>
               </button>
             )}
 

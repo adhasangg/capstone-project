@@ -107,7 +107,7 @@ export function createSessionRoute({ sessionService, jwtSecret }: SessionRouteOp
         return { success: true, data: queue };
       },
       {
-        beforeHandle: requireRoles(['counselor', 'admin']),
+        beforeHandle: requireRoles(['counselor']),
       },
     )
     .get(
@@ -129,7 +129,7 @@ export function createSessionRoute({ sessionService, jwtSecret }: SessionRouteOp
         return { success: true, data: history };
       },
       {
-        beforeHandle: requireRoles(['counselor', 'admin']),
+        beforeHandle: requireRoles(['counselor']),
       },
     )
     .post(
@@ -153,7 +153,7 @@ export function createSessionRoute({ sessionService, jwtSecret }: SessionRouteOp
         }
       },
       {
-        beforeHandle: requireRoles(['counselor', 'admin']),
+        beforeHandle: requireRoles(['counselor']),
       },
     )
     .post('/:id/close', async ({ params, headers, jwt, set }) => {

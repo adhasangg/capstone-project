@@ -49,7 +49,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ session, onNavigateTab
 
         <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
           Deteksi dini kelelahan akademik dengan instrumen baku DASS-21 &amp; VAK Fleming. Terhubung
-          langsung dengan konselor sebaya &amp; dosen pembimbing melalui enkripsi E2EE tanpa rekam
+          langsung dengan konselor pendamping melalui ruang obrolan aman &amp; privat tanpa rekam
           jejak identitas asli.
         </p>
 

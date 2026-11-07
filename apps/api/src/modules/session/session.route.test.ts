@@ -57,6 +57,14 @@ describe('Session Route Integration Tests (TDD & RBAC)', () => {
     });
   }
 
+  async function getAdminToken() {
+    return tokenSigner.decorator.jwt.sign({
+      userId: '44444444-4444-4444-4444-444444444444',
+      role: 'admin',
+      pseudonym: 'Admin_Sys',
+    });
+  }
+
   describe('POST /api/sessions/create', () => {
     it('should return 401 Unauthorized if no auth token is provided', async () => {
       const res = await app.handle(
@@ -103,6 +111,18 @@ describe('Session Route Integration Tests (TDD & RBAC)', () => {
       expect(res.status).toBe(403);
     });
 
+    it('should return 403 Forbidden when admin tries to inspect counselor queue (Least Privilege)', async () => {
+      const token = await getAdminToken();
+      const res = await app.handle(
+        new Request('http://localhost/api/sessions/queue', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      );
+
+      expect(res.status).toBe(403);
+    });
+
     it('should allow counselor to view waiting queue for triage', async () => {
       const token = await getCounselorToken();
       const res = await app.handle(
@@ -135,6 +155,18 @@ describe('Session Route Integration Tests (TDD & RBAC)', () => {
       expect(data.success).toBe(true);
       expect(data.data.status).toBe('active');
     });
+
+    it('should return 403 Forbidden when admin tries to accept a ticket', async () => {
+      const token = await getAdminToken();
+      const res = await app.handle(
+        new Request(`http://localhost/api/sessions/${sampleSession.id}/accept`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      );
+
+      expect(res.status).toBe(403);
+    });
   });
 
   describe('GET /api/sessions/counselor/history', () => {
@@ -156,6 +188,18 @@ describe('Session Route Integration Tests (TDD & RBAC)', () => {
 
     it('should reject student from accessing counselor history', async () => {
       const token = await getStudentToken();
+      const res = await app.handle(
+        new Request('http://localhost/api/sessions/counselor/history', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      );
+
+      expect(res.status).toBe(403);
+    });
+
+    it('should reject admin from accessing counselor history (Confidentiality)', async () => {
+      const token = await getAdminToken();
       const res = await app.handle(
         new Request('http://localhost/api/sessions/counselor/history', {
           method: 'GET',

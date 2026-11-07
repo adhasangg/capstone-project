@@ -50,15 +50,27 @@ export const api = {
     return json.data;
   },
 
-  async getMe(token: string): Promise<AuthSession['user']> {
+  async getMe(token: string): Promise<AuthSession> {
     const res = await fetch(`${BASE_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    const json: ApiResponse<{ user: AuthSession['user'] }> = await res.json();
+    const json: ApiResponse<{
+      id: string;
+      role: UserRole;
+      pseudonym: string;
+      token?: string;
+    }> = await res.json();
     if (!json.success) {
       throw new Error(json.error.message || 'Sesi telah kedaluwarsa');
     }
-    return json.data.user;
+    return {
+      token: json.data.token || token,
+      user: {
+        id: json.data.id,
+        role: json.data.role,
+        pseudonym: json.data.pseudonym,
+      },
+    };
   },
 
   // Assessments

@@ -13,7 +13,7 @@ import { AboutSection } from './components/home/AboutSection';
 import { LandingHero } from './components/home/LandingHero';
 import { AnonymousBanner } from './components/layout/AnonymousBanner';
 import { Navbar } from './components/layout/Navbar';
-import type { AuthSession } from './services/api';
+import { type AuthSession, api } from './services/api';
 import { offlineStorage } from './services/offlineStorage';
 
 const parseTabFromHash = (hash: string): string => {
@@ -245,6 +245,33 @@ function StudentContentRouter(props: MainRouterProps) {
     onEnterChat,
   } = props;
 
+  if (session?.user.role === 'admin') {
+    return (
+      <div className="max-w-md mx-auto py-12 text-center space-y-4">
+        <div className="p-6 bg-white border border-purple-200 rounded-2xl shadow-xs space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">
+            Akses Dibatasi
+          </div>
+          <h3 className="text-base font-bold text-slate-800">
+            Fitur Mahasiswa Tidak Tersedia untuk Akun Sysadmin
+          </h3>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Sesuai prinsip <em>Separation of Duties</em> (SoD) dan kerahasiaan pra-konseling, akun
+            Sysadmin dikhususkan untuk supervisi sistem dan manajemen peran. Fitur asesmen dan
+            dashboard konseling hanya dapat diakses melalui akun Mahasiswa.
+          </p>
+          <button
+            type="button"
+            onClick={() => onNavigateTab('admin')}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+          >
+            Kembali ke Panel Sysadmin
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (currentTab === 'assessment') {
     if (!session) {
       return (
@@ -317,17 +344,17 @@ function StaffContentRouter(props: MainRouterProps) {
   const { currentTab, session, activeSessionId, onNavigateTab, onLoginSuccess, onEnterChat } =
     props;
 
-  const isCounselorOrAdmin = session?.user.role === 'counselor' || session?.user.role === 'admin';
+  const isCounselor = session?.user.role === 'counselor';
   const isAdmin = session?.user.role === 'admin';
 
   if (currentTab === 'counselor-queue') {
-    if (!session || !isCounselorOrAdmin) {
+    if (!session || !isCounselor) {
       return (
         <ProtectedAuthGate
           badge="Rute Khusus Konselor / Dosen BK"
           badgeColorClass="text-[#3B5998]"
           title="Antrean Triage Konselor Sebaya &amp; Dosen BK"
-          description="Halaman ini khusus untuk staf konselor sebaya, dosen pembimbing, dan administrator terdaftar. Silakan masuk menggunakan akun konselor resmi."
+          description="Halaman ini khusus untuk staf konselor sebaya dan dosen pembimbing terdaftar. Akun Administrator dan Mahasiswa tidak memiliki akses ke antrean konseling klien demi menjaga kerahasiaan pra-konseling."
           onLoginSuccess={onLoginSuccess}
         />
       );
@@ -347,9 +374,7 @@ function StaffContentRouter(props: MainRouterProps) {
         />
       );
     }
-    return (
-      <AdminDashboard session={session} onNavigateQueue={() => onNavigateTab('counselor-queue')} />
-    );
+    return <AdminDashboard session={session} />;
   }
 
   if (currentTab === 'chat' && session) {
@@ -397,6 +422,28 @@ function MainContentRouter(props: MainRouterProps) {
   }
 
   return <StaffContentRouter {...props} />;
+}
+
+function syncRefreshedRole(
+  current: AuthSession,
+  refreshed: AuthSession,
+  currentTab: string,
+  onNavigate: (tab: string) => void,
+  setSession: React.Dispatch<React.SetStateAction<AuthSession | null>>,
+) {
+  if (refreshed.user.role === current.user.role) return;
+
+  setSession(refreshed);
+
+  if (current.user.role === 'student' && refreshed.user.role === 'counselor') {
+    if (currentTab === 'dashboard' || currentTab === 'home') {
+      onNavigate('counselor-queue');
+    }
+  } else if (current.user.role === 'counselor' && refreshed.user.role === 'student') {
+    if (currentTab === 'counselor-queue') {
+      onNavigate('dashboard');
+    }
+  }
 }
 
 export function App() {
@@ -496,6 +543,28 @@ export function App() {
     }
   }, [session]);
 
+  // Revalidasi profil dan peran sesi pengguna dari server saat aplikasi dimuat atau token berganti
+  useEffect(() => {
+    if (!session?.token) return;
+
+    let isCancelled = false;
+    api
+      .getMe(session.token)
+      .then((refreshed) => {
+        if (!isCancelled) {
+          syncRefreshedRole(session, refreshed, currentTab, navigateToTab, setSession);
+        }
+      })
+      .catch((err) => {
+        // Abaikan galat jaringan sementara saat luring
+        console.warn('Pengecekan sesi pengguna:', err);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [session?.token, session?.user?.role]);
+
   const handleLoginSuccess = (newSession: AuthSession) => {
     setSession(newSession);
     if (newSession.user.role === 'admin') {
@@ -508,6 +577,7 @@ export function App() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('safespace_session');
     setSession(null);
     navigateToTab('home');
   };

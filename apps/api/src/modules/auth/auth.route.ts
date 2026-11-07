@@ -112,54 +112,74 @@ export function createAuthRoute({
         }),
       },
     )
-    .get('/me', async ({ headers, jwt, set }): Promise<ApiResponse<AuthenticatedUser>> => {
-      const authHeader = headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        set.status = 401;
+    .get(
+      '/me',
+      async ({
+        headers,
+        jwt,
+        set,
+      }): Promise<ApiResponse<AuthenticatedUser & { token?: string }>> => {
+        const authHeader = headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          set.status = 401;
+          return {
+            success: false,
+            error: {
+              code: 'UNAUTHORIZED',
+              message: 'Missing or malformed authorization header',
+            },
+          };
+        }
+
+        const token = authHeader.slice(7);
+        const payload = (await jwt.verify(token)) as {
+          userId?: string;
+          role?: string;
+          pseudonym?: string;
+        } | null;
+
+        if (!payload || !payload.userId) {
+          set.status = 401;
+          return {
+            success: false,
+            error: {
+              code: 'INVALID_TOKEN',
+              message: 'Session token is invalid or expired',
+            },
+          };
+        }
+
+        const user = await authService.getUserById(payload.userId);
+        if (!user) {
+          set.status = 404;
+          return {
+            success: false,
+            error: {
+              code: 'USER_NOT_FOUND',
+              message: 'User associated with session does not exist',
+            },
+          };
+        }
+
+        // Terbitkan ulang token JWT jika peran pengguna di basis data telah berubah dari token sesi saat ini
+        let freshToken = token;
+        if (user.role !== payload.role) {
+          freshToken = await jwt.sign({
+            userId: user.id,
+            role: user.role,
+            pseudonym: user.pseudonym,
+          });
+        }
+
         return {
-          success: false,
-          error: {
-            code: 'UNAUTHORIZED',
-            message: 'Missing or malformed authorization header',
+          success: true,
+          data: {
+            ...user,
+            token: freshToken,
           },
         };
-      }
-
-      const token = authHeader.slice(7);
-      const payload = (await jwt.verify(token)) as {
-        userId?: string;
-        role?: string;
-        pseudonym?: string;
-      } | null;
-
-      if (!payload || !payload.userId) {
-        set.status = 401;
-        return {
-          success: false,
-          error: {
-            code: 'INVALID_TOKEN',
-            message: 'Session token is invalid or expired',
-          },
-        };
-      }
-
-      const user = await authService.getUserById(payload.userId);
-      if (!user) {
-        set.status = 404;
-        return {
-          success: false,
-          error: {
-            code: 'USER_NOT_FOUND',
-            message: 'User associated with session does not exist',
-          },
-        };
-      }
-
-      return {
-        success: true,
-        data: user,
-      };
-    })
+      },
+    )
     .get(
       '/users',
       async ({

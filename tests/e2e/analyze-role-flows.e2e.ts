@@ -2,9 +2,13 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Analisis Flow UI: Mahasiswa, Dosen/Konselor, dan Sysadmin', () => {
   test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => {
-      window.sessionStorage.setItem('safespace_sandbox_unlocked', 'true');
+    await page.goto('/?sandbox_key=safespace-evaluator-2026');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+      sessionStorage.setItem('safespace_sandbox_unlocked', 'true');
     });
+    await page.reload();
   });
 
   test('Flow 1: Pengunjung Publik (Landing Page, Tentang SafeSpace, Portal Auth)', async ({
@@ -107,7 +111,7 @@ test.describe('Analisis Flow UI: Mahasiswa, Dosen/Konselor, dan Sysadmin', () =>
         name: /Antrean Triage Pra-Konseling Anonim/i,
       }),
     ).toBeVisible();
-    await expect(page.getByText('Konselor / Dosen')).toBeVisible();
+    await expect(page.locator('header').getByText('Konselor').first()).toBeVisible();
     await page.screenshot({
       path: 'docs/screenshots/flow-07-konselor-antrean.png',
       fullPage: true,
@@ -151,6 +155,22 @@ test.describe('Analisis Flow UI: Mahasiswa, Dosen/Konselor, dan Sysadmin', () =>
       }),
     ).toBeVisible();
     await expect(page.getByText('Daftar Akun Pengguna & Penetapan Peran')).toBeVisible();
+
+    // Verifikasi pemisahan hak akses Sysadmin (Separation of Duties & Least Privilege):
+    // 1. Antrean Konseling dan Simulasi Mahasiswa TIDAK boleh ada di navbar
+    await expect(page.getByRole('button', { name: 'Antrean Konseling' })).not.toBeVisible();
+    await expect(page.getByRole('button', { name: 'Simulasi Mahasiswa' })).not.toBeVisible();
+
+    // 2. Tombol Lihat Antrean Konseling TIDAK boleh ada di header dashboard
+    await expect(page.getByRole('button', { name: 'Lihat Antrean Konseling' })).not.toBeVisible();
+
+    // 3. Hanya Panel Sysadmin dan Panduan yang tampil di navigasi
+    await expect(page.getByRole('button', { name: 'Panel Sysadmin' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Panduan' })).toBeVisible();
+
+    // 4. Verifikasi akun Sysadmin di tabel memiliki badge terproteksi tanpa tombol mutasi ke mahasiswa
+    await expect(page.getByText('Akun Terproteksi (Tidak Dapat Diubah)')).toBeVisible();
+
     await page.screenshot({
       path: 'docs/screenshots/flow-08-sysadmin-dashboard.png',
       fullPage: true,
