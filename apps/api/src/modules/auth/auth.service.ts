@@ -28,7 +28,7 @@ export async function defaultGoogleTokenVerifier(idToken: string): Promise<Googl
     return {
       sub: `mock_google_sub_${idToken}`,
       email: isAdmin
-        ? 'fhasanblog@gmail.com'
+        ? process.env.ADMIN_EMAILS?.split(',')[0]?.trim() || 'admin@ecampus.ut.ac.id'
         : isCounselor
           ? 'konselor@ecampus.ac.id'
           : 'mahasiswa.pjj@ecampus.ac.id',

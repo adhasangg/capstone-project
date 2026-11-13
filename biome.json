@@ -11,7 +11,10 @@
       ".gitnexus",
       ".claude",
       "test-results",
-      "tests/e2e-report"
+      "tests/e2e-report",
+      "scratch",
+      "scripts",
+      "docs"
     ]
   },
   "organizeImports": {

@@ -6,49 +6,78 @@ const { chromium } = require('playwright');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DOCS_DIR = path.join(ROOT_DIR, 'docs');
+const BAHAN_REVISI_DOCS_DIR = path.join(DOCS_DIR, 'bahan revisi');
+const BAHAN_REVISI_ROOT_DIR = path.join(ROOT_DIR, 'bahan revisi');
+
+for (const d of [BAHAN_REVISI_DOCS_DIR, BAHAN_REVISI_ROOT_DIR]) {
+  if (!fs.existsSync(d)) {
+    fs.mkdirSync(d, { recursive: true });
+  }
+}
 
 const FILES_TO_CONVERT = [
   {
+    input: path.join(DOCS_DIR, 'Revisi_Laporan_Kemajuan_Tugas2_KelompokB.md'),
+    filename: 'Revisi_Laporan_Kemajuan_Tugas2_KelompokB.pdf',
+    output: path.join(BAHAN_REVISI_DOCS_DIR, 'Revisi_Laporan_Kemajuan_Tugas2_KelompokB.pdf'),
+    title: 'MATRIKS TANGGAPAN & REVISI LAPORAN KEMAJUAN (TUGAS 2) - KELOMPOK B',
+    subtitle: 'Tanggapan Resmi atas 5 Catatan Reviewer STSI4440 Capstone Project FST UT (2026)',
+  },
+  {
     input: path.join(DOCS_DIR, 'Naskah_Resmi_Bab3_Metodologi.md'),
-    output: path.join(DOCS_DIR, 'Naskah_Resmi_Bab3_Metodologi.pdf'),
+    filename: 'Naskah_Resmi_Bab3_Metodologi.pdf',
+    output: path.join(BAHAN_REVISI_DOCS_DIR, 'Naskah_Resmi_Bab3_Metodologi.pdf'),
     title: 'BAB III METODOLOGI - SAFESPACE PWA',
     subtitle: 'Naskah Resmi Capstone Project Program Studi Sistem Informasi FST UT (2026)',
   },
   {
     input: path.join(DOCS_DIR, 'Panduan_Operasional_UAT_Tim.md'),
-    output: path.join(DOCS_DIR, 'Panduan_Operasional_UAT_Tim.pdf'),
+    filename: 'Panduan_Operasional_UAT_Tim.pdf',
+    output: path.join(BAHAN_REVISI_DOCS_DIR, 'Panduan_Operasional_UAT_Tim.pdf'),
     title: 'PANDUAN OPERASIONAL UAT (SUS) - SAFESPACE PWA',
     subtitle: 'Panduan Eksekusi Kuesioner dan Olah Data Skor SUS untuk Tim',
   },
   {
-    input: path.join(DOCS_DIR, 'Bank_Bahan_Presentasi_dan_Laporan.md'),
-    output: path.join(DOCS_DIR, 'Bank_Bahan_Presentasi_dan_Laporan.pdf'),
-    title: 'BANK BAHAN DEVELOPMENT - SAFESPACE PWA',
-    subtitle: 'Kumpulan Metrik, Fitur Unggulan, Aset Gambar, dan Diagram untuk Slide & Laporan',
-  },
-  {
-    input: path.join(DOCS_DIR, 'Matriks_Black_Box_Testing.md'),
-    output: path.join(DOCS_DIR, 'Matriks_Black_Box_Testing.pdf'),
-    title: 'MATRIKS BLACK-BOX TESTING - SAFESPACE PWA',
-    subtitle: 'Rancangan dan Hasil Uji Fungsionalitas Sistem (13 Skenario Pengujian Lolos 100%)',
-  },
-  {
     input: path.join(DOCS_DIR, 'Kuesioner_SUS_dan_Panduan_UAT.md'),
-    output: path.join(DOCS_DIR, 'Kuesioner_SUS_dan_Panduan_UAT.pdf'),
+    filename: 'Kuesioner_SUS_dan_Panduan_UAT.pdf',
+    output: path.join(BAHAN_REVISI_DOCS_DIR, 'Kuesioner_SUS_dan_Panduan_UAT.pdf'),
     title: 'KUESIONER SUS & PANDUAN UAT - SAFESPACE PWA',
     subtitle: 'Instrumen Pengujian Kelaikan dan Usabilitas Sistem (System Usability Scale)',
   },
   {
+    input: path.join(DOCS_DIR, 'Matriks_Black_Box_Testing.md'),
+    filename: 'Matriks_Black_Box_Testing.pdf',
+    output: path.join(BAHAN_REVISI_DOCS_DIR, 'Matriks_Black_Box_Testing.pdf'),
+    title: 'MATRIKS BLACK-BOX TESTING - SAFESPACE PWA',
+    subtitle: 'Rancangan dan Hasil Uji Fungsionalitas Sistem (14 Skenario Pengujian Lolos 100%)',
+  },
+  {
     input: path.join(DOCS_DIR, 'Instrumen_Baku_DASS21_dan_VAK.md'),
-    output: path.join(DOCS_DIR, 'Instrumen_Baku_DASS21_dan_VAK.pdf'),
+    filename: 'Instrumen_Baku_DASS21_dan_VAK.pdf',
+    output: path.join(BAHAN_REVISI_DOCS_DIR, 'Instrumen_Baku_DASS21_dan_VAK.pdf'),
     title: 'INSTRUMEN BAKU KLINIS DASS-21 & VAK - SAFESPACE PWA',
     subtitle: 'Spesifikasi Pembobotan, Formula Skor, dan Parameter Deteksi Kejenuhan Belajar',
   },
   {
+    input: path.join(DOCS_DIR, 'Bank_Bahan_Presentasi_dan_Laporan.md'),
+    filename: 'Bank_Bahan_Presentasi_dan_Laporan.pdf',
+    output: path.join(BAHAN_REVISI_DOCS_DIR, 'Bank_Bahan_Presentasi_dan_Laporan.pdf'),
+    title: 'BANK BAHAN DEVELOPMENT - SAFESPACE PWA',
+    subtitle: 'Kumpulan Metrik, Fitur Unggulan, Aset Gambar, dan Diagram untuk Slide & Laporan',
+  },
+  {
     input: path.join(DOCS_DIR, 'Daftar_Pustaka_Mutakhir_5_Tahun.md'),
-    output: path.join(DOCS_DIR, 'Daftar_Pustaka_Mutakhir_5_Tahun.pdf'),
+    filename: 'Daftar_Pustaka_Mutakhir_5_Tahun.pdf',
+    output: path.join(BAHAN_REVISI_DOCS_DIR, 'Daftar_Pustaka_Mutakhir_5_Tahun.pdf'),
     title: 'DAFTAR PUSTAKA MUTAKHIR - SAFESPACE PWA',
     subtitle: 'Kompilasi Rujukan Ilmiah Terindeks Bereputasi (IEEE, ACM, Scopus, SINTA)',
+  },
+  {
+    input: path.join(DOCS_DIR, 'Catatan_Penyelarasan_Dokumen_Revisi_KelompokB.md'),
+    filename: 'Catatan_Penyelarasan_Dokumen_Revisi_KelompokB.pdf',
+    output: path.join(BAHAN_REVISI_DOCS_DIR, 'Catatan_Penyelarasan_Dokumen_Revisi_KelompokB.pdf'),
+    title: 'CATATAN PENYELARASAN AKHIR DOKUMEN REVISI TUGAS 2 - KELOMPOK B',
+    subtitle: 'Panduan Perbaikan & Draf Siap Copy-Paste untuk Tim Penyusun Dokumen (2026)',
   },
 ];
 
@@ -397,6 +426,10 @@ async function convertFile(fileMeta, browser) {
 
   await page.close();
   console.log(`SUCCESS: Created ${fileMeta.output}`);
+  if (fileMeta.filename) {
+    fs.copyFileSync(fileMeta.output, path.join(BAHAN_REVISI_ROOT_DIR, fileMeta.filename));
+    fs.copyFileSync(fileMeta.output, path.join(DOCS_DIR, fileMeta.filename));
+  }
 }
 
 async function main() {
@@ -407,8 +440,17 @@ async function main() {
     await convertFile(f, browser);
   }
 
+  const companionFiles = ['UAT_SUS_Kalkulator_Otomatis.xlsx', 'flowchart_dashboard.html'];
+  for (const cf of companionFiles) {
+    const src = path.join(DOCS_DIR, cf);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, path.join(BAHAN_REVISI_DOCS_DIR, cf));
+      fs.copyFileSync(src, path.join(BAHAN_REVISI_ROOT_DIR, cf));
+    }
+  }
+
   await browser.close();
-  console.log('All PDF files generated successfully!');
+  console.log('All PDF files and companion artifacts generated successfully in bahan revisi!');
 }
 
 main().catch((err) => {

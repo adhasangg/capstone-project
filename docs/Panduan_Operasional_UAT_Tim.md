@@ -9,10 +9,88 @@ Telah disediakan berkas lembar kerja spreadsheet Excel otomatis:
 
 ## 1. Ringkasan Singkat (Apa yang Perlu Dilakukan?)
 
-Tugas rekan tim sangat sederhana dan terdiri dari 3 tahapan:
-1. **Buat Google Form** menggunakan teks 10 pertanyaan yang sudah disiapkan di bawah.
-2. **Sebarkan ke 20 - 30 rekan mahasiswa Universitas Terbuka (UT)** setelah mereka mencoba membuka aplikasi SafeSpace PWA.
-3. **Salin nilai respon ke berkas Excel `UAT_SUS_Kalkulator_Otomatis.xlsx`** (rumus di Excel akan menghitung total skor dan rata-rata secara otomatis).
+Tugas rekan tim sangat terstruktur dalam 5 fase pengujian:
+1. **Siapkan Google Form** menggunakan teks 10 pertanyaan baku SUS yang sudah disiapkan di bawah.
+2. **Sebarkan ke 20 - 30 rekan mahasiswa Universitas Terbuka (UT)** lintas fakultas beserta tautan aplikasi SafeSpace PWA.
+3. **Sosialisasikan batasan pengujian:** Pengujian MURNI mengevaluasi sistem perangkat lunak (kemudahan antarmuka, kejelasan alur asesmen DASS-21 dan VAK, responsivitas, dan tombol safe exit), BUKAN menguji isi konseling atau efektivitas medis.
+4. **Responden mengisi Google Form** segera setelah menyelesaikan 4 tugas terpandu (*bounded testing tasks*).
+5. **Salin nilai respon ke berkas Excel `UAT_SUS_Kalkulator_Otomatis.xlsx`** (rumus di Excel akan menghitung skor individu dan rata-rata secara otomatis).
+
+---
+
+### Flowchart Prosedur Operasional Pengujian UAT & SUS:
+
+```mermaid
+flowchart TD
+    classDef startend fill:#4A7C59,stroke:#3b6347,stroke-width:2px,color:#fff;
+    classDef process fill:#EBF3ED,stroke:#4A7C59,stroke-width:1.5px,color:#1E293B;
+    classDef task fill:#EFF6FF,stroke:#3B82F6,stroke-width:1.5px,color:#1E293B;
+    classDef decision fill:#FEF3C7,stroke:#D97706,stroke-width:1.5px,color:#92400E;
+
+    START(["Mulai: Pengujian Penerimaan Pengguna (UAT)"]):::startend
+
+    subgraph P1 ["Fase 1: Persiapan Lingkungan & Instrumen Pengujian"]
+        ENV["1. Siapkan Lingkungan Aplikasi Staging/Testing SafeSpace PWA"]:::process
+        GFORM["2. Buat Google Form UAT Berisi 10 Butir Baku SUS Skala Likert 1-5"]:::process
+        GUIDE["3. Susun Panduan 4 Skenario Tugas Terpandu (Bounded Testing Tasks)"]:::process
+    end
+
+    subgraph P2 ["Fase 2: Distribusi & Sosialisasi Batasan Pengujian"]
+        RECRUIT["Undang 20-30 Responden Mahasiswa Universitas Terbuka Lintas Fakultas"]:::process
+        BRIEF["Sosialisasi Batasan: Pengujian MURNI Sistem Software, BUKAN Isi Bimbingan Konselor"]:::process
+    end
+
+    subgraph P3 ["Fase 3: Pelaksanaan 4 Skenario Tugas Terpandu oleh Mahasiswa"]
+        T1["Tugas 1: Akses Landing Page & Masuk via Google OAuth"]:::task
+        T2["Tugas 2: Pengisian Asesmen Mandiri DASS-21 & Cek Tampilan Skor Keparahan"]:::task
+        T3["Tugas 3: Pengisian Kuesioner Gaya Belajar VAK & Cek Rekomendasi Tips Belajar UT"]:::task
+        T4["Tugas 4: Eksplorasi Jurnal Mood Refleksi & Uji Tombol Darurat Safe Exit"]:::task
+    end
+
+    subgraph P4 ["Fase 4: Pengisian Kuesioner Evaluasi SUS"]
+        OPEN_GF["Responden Membuka Tautan Google Form Segera Setelah Mencoba Aplikasi"]:::process
+        FILL_SUS["Responden Menilai 10 Butir Baku SUS Berdasarkan Pengalaman Penggunaan"]:::process
+        FEEDBACK["Responden Memberikan Umpan Balik Kualitatif Kendala Antarmuka (Opsional)"]:::process
+    end
+
+    subgraph P5 ["Fase 5: Pengolahan Skor & Penentuan Kelayakan"]
+        EXPORT_XLS["Ekspor Respons ke Spreadsheet Kalkulator SUS Otomatis (UAT_SUS_Kalkulator_Otomatis.xlsx)"]:::process
+        CALC_ITEM["Hitung Kontribusi Butir: Ganjil (Skor - 1) & Genap (5 - Skor)"]:::process
+        CALC_SCORE["Hitung Skor SUS Individu = Total Kontribusi x 2,5 (Skala 0 - 100)"]:::process
+        CALC_MEAN["Hitung Nilai Rata-rata Skor SUS Seluruh Responden (Mean SUS)"]:::process
+        CHECK_SCORE{"Apakah Skor Rata-rata SUS >= 68,0? (Standar Kelaikan Industri)"}:::decision
+        REVISE["Identifikasi Masukan Pengguna & Lakukan Perbaikan Desain/Alur Sistem (Refinement)"]:::process
+        PASSED["Sistem Dinyatakan Layak Adopsi (Kategori Acceptable / Grade B - A)"]:::process
+    end
+
+    END_NODE(["Selesai: Rekapitulasi Data Dimasukkan ke Bab IV & V Laporan Akhir"]):::startend
+
+    START --> ENV
+    ENV --> GFORM
+    GFORM --> GUIDE
+    GUIDE --> RECRUIT
+    RECRUIT --> BRIEF
+    BRIEF --> T1
+    T1 --> T2
+    T2 --> T3
+    T3 --> T4
+    T4 --> OPEN_GF
+    OPEN_GF --> FILL_SUS
+    FILL_SUS --> FEEDBACK
+    FEEDBACK --> EXPORT_XLS
+    EXPORT_XLS --> CALC_ITEM
+    CALC_ITEM --> CALC_SCORE
+    CALC_SCORE --> CALC_MEAN
+    CALC_MEAN --> CHECK_SCORE
+    CHECK_SCORE -- "Tidak (< 68,0)" --> REVISE
+    REVISE --> T1
+    CHECK_SCORE -- "Ya (>= 68,0)" --> PASSED
+    PASSED --> END_NODE
+```
+
+> **Catatan Unduh Gambar:**  
+> Flowchart di atas juga dapat diakses dan diunduh dalam format gambar resolusi tinggi (PNG/SVG) melalui dasbor diagram:  
+> [**`docs/flowchart_dashboard.html`**](file:///d:/ijplabs/capstone/docs/flowchart_dashboard.html) (Tab: *9. Alur Pengujian UAT & SUS*).
 
 ---
 

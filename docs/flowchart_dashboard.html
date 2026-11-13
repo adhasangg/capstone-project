@@ -308,6 +308,7 @@
       <button class="tab-btn" onclick="scrollToCard('diag-arsitektur')">6. Arsitektur Komponen Monorepo</button>
       <button class="tab-btn" onclick="scrollToCard('diag-auth-rbac')">7. Autentikasi Google & RBAC</button>
       <button class="tab-btn" onclick="scrollToCard('diag-offline-sync')">8. Mode Offline PWA & Sinkronisasi</button>
+      <button class="tab-btn" onclick="scrollToCard('diag-uat-flow')">9. Alur Pengujian UAT & SUS</button>
     </div>
 
     <!-- DIAGRAM 1: MODEL PROTOTYPING -->
@@ -456,7 +457,7 @@ flowchart TD
 
     START(["Mulai: Mahasiswa Mengakses PWA"]):::startend
     AUTH[/"Login Google OAuth: Input Token Kredensial"/]:::io
-    HASH["Server Verifikasi ID Token<br/>• Hashing: SHA-256(Google_Sub + Pepper)<br/>• Buang data email & nama asli dari memori<br/>• Terbitkan JWT Sesi Anonim"]:::process
+    HASH["Server Verifikasi ID Token<br/>• Hashing: HMAC-SHA-256(Google_Sub, Pepper)<br/>• Buang data email & nama asli dari memori<br/>• Terbitkan JWT Sesi Anonim"]:::process
     CHOOSE{"Pilih Aktivitas<br/>pada Dashboard"}:::decision
 
     ASSESS_DASS[/"Input Jawaban 21 Butir Soal DASS-21"/]:::io
@@ -474,7 +475,7 @@ flowchart TD
     
     CREATE_TICKET["Sistem Menerbitkan Tiket Pra-Konseling<br/>• Status: 'waiting'<br/>• Terbitkan Pseudonim Baru: 'Sahabat Pelita-27'<br/>• Lampirkan Snapshot dass21_score & vak_result"]:::process
     QUEUE_MATCH["Antrean Triage Konselor Sebaya<br/>• Konselor memilah tiket berdasar keparahan<br/>• Konselor mengklaim tiket tanpa tahu identitas asli"]:::process
-    CHAT_E2EE["Sesi Obrolan Terenkripsi E2EE Dimulai<br/>• Enkripsi lokal AES-GCM 256-bit di peramban<br/>• Zero-Knowledge: Server hanya relay ciphertext"]:::process
+    CHAT_E2EE["Sesi Obrolan Terenkripsi Dimulai<br/>• Enkripsi lokal AES-GCM-256 (PBKDF2) di peramban<br/>• Server menyimpan & meneruskan ciphertext + IV"]:::process
     FINISH(["Selesai: Penutupan Sesi & Evaluasi Mandiri"]):::startend
 
     START --> AUTH
@@ -540,30 +541,31 @@ sequenceDiagram
     participant DB as PostgreSQL (Drizzle)
     actor K as Konselor (Browser)
 
-    Note over M,S: FASE 1: ONE-WAY ANONYMOUS AUTHENTICATION
+    Note over M,S: FASE 1: ONE-WAY PSEUDONYMOUS AUTHENTICATION
     M->>S: POST /api/auth/google (Google ID Token)
-    Note over S: 1. Verifikasi Google Signature<br/>2. Hashing: SHA-256(Google_Sub + PEPPER)<br/>3. Buang email & nama asli dari memori
+    Note over S: 1. Verifikasi Google TokenInfo<br/>2. Hashing: HMAC-SHA-256(Google_Sub, PEPPER)<br/>3. Buang email & nama asli dari memori
     S->>DB: Query / Insert ke `users_auth` (hashed_identity, role='student')
-    DB-->>S: Return UUID & User Status
-    S-->>M: JWT Anonim (userId, role='student')
+    DB-->>S: Return UUID & Role
+    S-->>M: JWT Sesi (userId, role='student', pseudonym)
 
-    Note over M,K: FASE 2: UNLINKABLE EPHEMERAL TICKETING
+    Note over M,K: FASE 2: EPHEMERAL SESSION PSEUDONYM TICKETING
     M->>S: POST /api/sessions/create (Lampiran: dass21_score, vak_result)
-    Note over S: Terbitkan Pseudonim Baru: "Sahabat Pelita-27"
-    S->>DB: INSERT `counseling_sessions` (student_pseudonym, JSONB scores)
+    Note over S: Terbitkan Pseudonim Sesi Baru: "Sahabat Pelita-27"
+    S->>DB: INSERT `counseling_sessions` (student_pseudonym, dass21_score, vak_result, status='waiting')
     K->>S: GET /api/sessions/queue (Auth: Counselor JWT)
-    S->>DB: SELECT sessions WHERE status='waiting'
+    S->>DB: SELECT counseling_sessions WHERE status='waiting'
     DB-->>S: Data Tiket ('Sahabat Pelita-27', dass21_score, vak_result)
-    S-->>K: Antrean Triage (Konselor tidak bisa melacak profil asli)
+    S-->>K: Antrean Triage (Identitas asli mahasiswa tidak ditampilkan)
 
-    Note over M,K: FASE 3: CLIENT-SIDE E2EE CHAT (AES-GCM-256)
-    K->>S: POST /api/sessions/:id/accept (Klaim Tiket)
-    M->>M: Enkripsi Pesan via Web Crypto API (AES-GCM-256)
-    M->>S: POST /api/chat/:id/send (encryptedContent = Ciphertext Base64, iv)
-    S->>DB: INSERT `chat_messages` (encrypted_content, iv, sender_type='student')
-    Note over S,DB: Zero-Knowledge: Server & DB hanya melihat Ciphertext acak
-    S->>K: Forward Ciphertext & IV
-    K->>K: Dekripsi Pesan di Browser Konselor
+    Note over M,K: FASE 3: CLIENT-SIDE ENCRYPTED CHAT (AES-GCM-256 & PBKDF2)
+    K->>S: POST /api/sessions/:id/accept (Klaim Tiket -> status='active')
+    M->>M: Turunkan Kunci Sesi (PBKDF2 SHA-256 100k iterasi)<br/>& Enkripsi Pesan via Web Crypto API (AES-GCM-256 + IV 12-byte Hex)
+    M->>S: POST /api/chat/:id/send (encryptedContent = Ciphertext Base64, iv = Hex)
+    S->>DB: INSERT `messages` (session_id, sender_type='student', encrypted_content, iv)
+    Note over S,DB: Penyimpanan Ciphertext: Tabel `messages` tanpa kolom sender_id
+    K->>S: GET /api/chat/:id/messages (Ambil Riwayat Ciphertext & IV)
+    S-->>K: Return Daftar Pesan (`encrypted_content`, `iv`, `sender_type`)
+    K->>K: Dekripsi Pesan di Browser Konselor (decryptClientMessage)
           </pre>
         </div>
       </div>
@@ -577,7 +579,7 @@ sequenceDiagram
         </div>
       </div>
       <div class="card-footer">
-        📌 <strong>Rujukan Naskah:</strong> Subbab <em>3.3.4 Perancangan Mekanisme Kriptografi & Privasi Data</em>.
+        📌 <strong>Rujukan Naskah:</strong> Subbab <em>3.3.4 Rancangan Privasi dan Batasan Keamanan</em>.
       </div>
     </div>
 
@@ -585,8 +587,8 @@ sequenceDiagram
     <div class="card" id="diag-class-erd">
       <div class="card-header">
         <div class="card-title-group">
-          <h2>5. Class Diagram & Relasi Entitas Basis Data (Standar OMG UML 2.5 & Martin Crow's Foot)</h2>
-          <p>Struktur kelas entitas domain 3 kompartemen (Class Name, Attributes, Methods) dan pemodelan relasi basis data PostgreSQL Drizzle ORM tanpa atribut PII (Zero-PII Storage).</p>
+          <h2>5. Class Diagram & Relasi Entitas Basis Data (Standar OMG UML 2.5 - 4 Tabel Aktual)</h2>
+          <p>Struktur kelas entitas domain 3 kompartemen dan pemodelan relasi 4 tabel basis data PostgreSQL Drizzle ORM (`users_auth`, `counselors_profile`, `counseling_sessions`, `messages`).</p>
         </div>
         <div class="card-actions">
           <button class="btn btn-secondary" onclick="copyMermaidCode('code-class-erd')">📋 Salin Kode</button>
@@ -598,59 +600,69 @@ sequenceDiagram
           <pre class="mermaid" id="code-class-erd">
 classDiagram
     direction TB
-    class UsersAuth {
+    class users_auth {
         +UUID id PK
-        +String hashed_identity UK
-        +String pseudonym
-        +String role
-        +Timestamp created_at
-        +verifyToken()
-        +sanitizeIdentity()
+        +VARCHAR_64 hashed_identity UK
+        +ENUM role
+        +TIMESTAMPTZ created_at
+        +TIMESTAMPTZ updated_at
+        +authenticateWithGoogle()
+        +updateUserRole()
     }
 
-    class CounselingSessions {
+    class counselors_profile {
+        +UUID id PK
+        +UUID user_id FK_UK
+        +VARCHAR_100 pseudonym_name
+        +TEXT public_key
+        +BOOLEAN is_available
+        +TIMESTAMPTZ created_at
+        +TIMESTAMPTZ updated_at
+    }
+
+    class counseling_sessions {
         +UUID id PK
         +UUID student_id FK
-        +UUID counselor_id FK
-        +String student_pseudonym
+        +UUID counselor_id FK_Nullable
+        +VARCHAR_100 student_pseudonym
         +JSONB dass21_score
         +JSONB vak_result
-        +String status
-        +Timestamp created_at
-        +Timestamp closed_at
+        +ENUM status
+        +TIMESTAMPTZ created_at
+        +TIMESTAMPTZ closed_at
         +createTicket()
-        +claimSession()
-        +closeSession()
+        +acceptTicket()
+        +closeTicket()
     }
 
-    class ChatMessages {
+    class messages {
         +UUID id PK
         +UUID session_id FK
-        +UUID sender_id FK
-        +String sender_type
-        +Text encrypted_content
-        +String iv
-        +Timestamp sent_at
-        +sendEncrypted()
-        +fetchSessionHistory()
+        +ENUM sender_type
+        +TEXT encrypted_content
+        +VARCHAR_64 iv
+        +TIMESTAMPTZ timestamp
+        +sendMessage()
+        +getMessages()
     }
 
-    UsersAuth "1" --> "0..*" CounselingSessions : creates as student (student_id)
-    UsersAuth "1" --> "0..*" CounselingSessions : handles as counselor (counselor_id)
-    CounselingSessions "1" --> "0..*" ChatMessages : contains chat history (session_id)
+    users_auth "1" --> "0..1" counselors_profile : has counselor profile (user_id)
+    users_auth "1" --> "0..*" counseling_sessions : creates as student (student_id)
+    users_auth "1" --> "0..*" counseling_sessions : handles as counselor (counselor_id)
+    counseling_sessions "1" --> "0..*" messages : stores encrypted chat (session_id)
           </pre>
         </div>
       </div>
       <div class="symbol-audit-box">
         <h4>📋 Audit Kepatuhan Simbol Class Diagram (Standar Baku OMG UML 2.5):</h4>
         <div class="symbol-audit-grid">
-          <div class="symbol-item"><span class="symbol-badge">3 Kompartemen</span> Nama Kelas, Atribut Data, dan Operasi/Method</div>
+          <div class="symbol-item"><span class="symbol-badge">3 Kompartemen</span> Nama Tabel/Kelas, Kolom Atribut, dan Operasi/Method</div>
           <div class="symbol-item"><span class="symbol-badge">Visibilitas (+)</span> Simbol Hak Akses Publik (Public Member)</div>
-          <div class="symbol-item"><span class="symbol-badge">Kardinalitas (1 ke 0..*)</span> Multiplisitas Relasi Satu-ke-Banyak</div>
+          <div class="symbol-item"><span class="symbol-badge">Kardinalitas (1 ke 0..*)</span> Multiplisitas Relasi Satu-ke-Banyak & Satu-ke-Satu</div>
         </div>
       </div>
       <div class="card-footer">
-        📌 <strong>Rujukan Naskah:</strong> Subbab <em>3.3.2 Perancangan Basis Data (Class Diagram & Kamus Data)</em>.
+        📌 <strong>Rujukan Naskah:</strong> Subbab <em>3.3.2 Perancangan Basis Data dan Relasi (Tabel 3.4)</em>.
       </div>
     </div>
 
@@ -658,8 +670,8 @@ classDiagram
     <div class="card" id="diag-arsitektur">
       <div class="card-header">
         <div class="card-title-group">
-          <h2>6. Diagram Arsitektur Komponen Sistem (Monorepo Bun Multi-Tier)</h2>
-          <p>Pemisahan tanggung jawab sistem menjadi 4 lapisan: Client PWA, Shared Kernel, Server Backend ElysiaJS, dan Basis Data PostgreSQL Drizzle.</p>
+          <h2>6. Diagram Arsitektur Komponen Sistem (Monorepo Bun Workspaces)</h2>
+          <p>Pemisahan tanggung jawab sistem menjadi 4 lapisan sesuai Tabel 3.5: Frontend (`apps/web`), Backend (`apps/api`), Shared Kernel (`packages/shared`), dan Data (`packages/db`).</p>
         </div>
         <div class="card-actions">
           <button class="btn btn-secondary" onclick="copyMermaidCode('code-arsitektur')">📋 Salin Kode</button>
@@ -675,43 +687,44 @@ flowchart TB
     classDef shared fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#1E293B;
     classDef db fill:#F3E8FF,stroke:#7E22CE,stroke-width:2px,color:#1E293B;
 
-    subgraph CLIENT_LAYER["1. Lapisan Klien Pengguna (apps/web)"]
-        UI_CORE["React 19 + Vite (PWA Service Worker)"]:::client
-        UI_DESIGN["Tailwind CSS v4 & Trauma-Informed UI"]:::client
-        UI_CRYPTO["Web Crypto API (E2EE AES-GCM 256-bit)"]:::client
-        UI_STORAGE["LocalStorage (Offline Assessment Cache)"]:::client
+    subgraph CLIENT_LAYER["1. Frontend PWA (apps/web)"]
+        UI_CORE["React 19 + Vite + vite-plugin-pwa"]:::client
+        UI_DESIGN["Tailwind CSS & Antarmuka Responsif"]:::client
+        UI_CRYPTO["Web Crypto API (AES-GCM-256 & PBKDF2 di crypto.ts)"]:::client
+        UI_STORAGE["LocalStorage (Penyimpanan Sesi & Sinkronisasi Asesmen)"]:::client
     end
 
-    subgraph SHARED_LAYER["2. Lapisan Kernel Bersama (packages/shared)"]
-        SH_CALC["Kalkulator Psikometri Baku (DASS-21 & VAK)"]:::shared
-        SH_VALID["Skema Validasi TypeBox / Zod Type-Safe"]:::shared
-        SH_CRYPT["Util Kriptografi (SHA-256 One-Way Hash + Pepper)"]:::shared
-        SH_PSEUDO["Generator Pseudonim Dinamis per Tiket"]:::shared
+    subgraph SHARED_LAYER["2. Domain & Validasi Bersama (packages/shared)"]
+        SH_CALC["Kalkulator Deterministik (calculateDass21Score & calculateVakScore)"]:::shared
+        SH_VALID["Validator Skema Input & Sanitasi Teks"]:::shared
+        SH_CRYPT["Util Hash Identitas (HMAC-SHA-256 + Server Pepper)"]:::shared
+        SH_PSEUDO["Generator Pseudonim Akun & Pseudonim per Tiket"]:::shared
     end
 
-    subgraph SERVER_LAYER["3. Lapisan Peladen API (apps/api)"]
-        API_FRAME["ElysiaJS Web Framework (Bun Runtime v1.3)"]:::server
-        API_AUTH["Modul Auth (Google OAuth 2.0 Verifier)"]:::server
-        API_RBAC["RBAC Middleware Guard (Student / Counselor / Admin)"]:::server
-        API_ASSESS["Modul Assessment Deterministik & Empathetic Feedback"]:::server
-        API_CHAT["Modul E2EE Ciphertext Relaying"]:::server
+    subgraph SERVER_LAYER["3. Backend API (apps/api)"]
+        API_FRAME["ElysiaJS Framework + Plugin JWT (Bun Runtime)"]:::server
+        API_AUTH["Modul Auth (Verifikasi Google ID Token & HMAC-SHA-256)"]:::server
+        API_RBAC["Kontrol Akses Peran (Student / Counselor / Admin)"]:::server
+        API_ASSESS["Modul Assessment, Mood Refleksi & Session Tiket"]:::server
+        API_CHAT["Modul Chat (Penyimpanan & Pengambilan Ciphertext/IV)"]:::server
     end
 
-    subgraph DB_LAYER["4. Lapisan Basis Data (packages/db)"]
-        DB_ORM["Drizzle ORM (TypeScript-First Migration)"]:::db
-        DB_PG[("PostgreSQL Database (Port 5433)")]:::db
-        subgraph TABLES["Relational Tables"]
-            T_AUTH["users_auth (Hashed Identity, Role)"]:::db
-            T_SESS["counseling_sessions (Ephemeral Pseudonym, JSONB)"]:::db
-            T_MSG["chat_messages (Encrypted Content, IV)"]:::db
+    subgraph DB_LAYER["4. Basis Data Relasional (packages/db)"]
+        DB_ORM["Drizzle ORM (Skema TypeScript PostgreSQL)"]:::db
+        DB_PG[("PostgreSQL Database")]:::db
+        subgraph TABLES["4 Tabel Skema Aktual (packages/db/src/schema)"]
+            T_AUTH["users_auth (id, hashed_identity, role)"]:::db
+            T_PROF["counselors_profile (user_id, pseudonym_name, public_key)"]:::db
+            T_SESS["counseling_sessions (student_pseudonym, dass21_score, vak_result)"]:::db
+            T_MSG["messages (session_id, sender_type, encrypted_content, iv)"]:::db
         end
     end
 
-    CLIENT_LAYER -->|Import Type & Validasi| SHARED_LAYER
-    SERVER_LAYER -->|Import Type & Logika Baku| SHARED_LAYER
-    CLIENT_LAYER <-->|HTTP REST JSON| SERVER_LAYER
-    SERVER_LAYER -->|Query Scoping Terisolasi| DB_ORM
-    DB_ORM <-->|Native PostgreSQL Driver| DB_PG
+    CLIENT_LAYER -->|Impor Fungsi & Tipe| SHARED_LAYER
+    SERVER_LAYER -->|Impor Fungsi & Validasi| SHARED_LAYER
+    CLIENT_LAYER <-->|HTTP REST JSON + Bearer JWT| SERVER_LAYER
+    SERVER_LAYER -->|Query Relasional| DB_ORM
+    DB_ORM <-->|Driver PostgreSQL| DB_PG
     DB_PG --- TABLES
           </pre>
         </div>
@@ -753,7 +766,7 @@ flowchart TD
     CHECK_DOMAIN{"Domain Email Diizinkan Whitelist?"}:::decision
     ERR_DOMAIN["Tolak Akses: Domain Email Tidak Berwenang"]:::process
 
-    SANITIZE["Sanitasi Identitas Satu Arah: SHA-256(Google_Sub + Pepper Secret)<br/>• Buang alamat email dan nama asli dari memori runtime"]:::process
+    SANITIZE["Sanitasi Identitas Satu Arah: HMAC-SHA-256(Google_Sub, Pepper Secret)<br/>• Buang alamat email dan nama asli dari memori runtime"]:::process
     CHECK_EXIST{"Hash Identitas Sudah Terdaftar di Basis Data?"}:::decision
     FETCH_ROLE["Ambil Peran yang Sudah Ada di Basis Data"]:::process
 
@@ -886,6 +899,94 @@ flowchart TD
       </div>
     </div>
 
+    <!-- DIAGRAM 9: ALUR PENGUJIAN UAT & SUS -->
+    <div class="card" id="diag-uat-flow">
+      <div class="card-header">
+        <div class="card-title-group">
+          <h2>9. Flowchart Prosedur Operasional Pengujian Penerimaan Pengguna (UAT) & Evaluasi SUS</h2>
+          <p>Alur metodologis pelaksanaan UAT berbasis Google Form dan evaluasi kemudahan sistem menggunakan instrumen baku System Usability Scale (SUS) 10 butir (Brooke, 1996; Bangor et al., 2008).</p>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-secondary" onclick="copyMermaidCode('code-uat-flow')">📋 Salin Kode</button>
+          <button class="btn btn-primary" onclick="exportToPNG('diag-uat-flow', 'Flowchart_Operasional_UAT_SUS')">⬇️ Download PNG</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="mermaid-wrapper">
+          <pre class="mermaid" id="code-uat-flow">
+flowchart TD
+    classDef startend fill:#4A7C59,stroke:#3b6347,stroke-width:2px,color:#fff;
+    classDef process fill:#EBF3ED,stroke:#4A7C59,stroke-width:1.5px,color:#1E293B;
+    classDef task fill:#EFF6FF,stroke:#3B82F6,stroke-width:1.5px,color:#1E293B;
+    classDef decision fill:#FEF3C7,stroke:#D97706,stroke-width:1.5px,color:#92400E;
+
+    START(["Mulai: Pengujian Penerimaan Pengguna (UAT)"]):::startend
+
+    subgraph P1 ["Fase 1: Persiapan Lingkungan & Instrumen Pengujian"]
+        ENV["1. Siapkan Lingkungan Aplikasi Staging/Testing SafeSpace PWA"]:::process
+        GFORM["2. Buat Google Form UAT Berisi 10 Butir Baku SUS Skala Likert 1-5"]:::process
+        GUIDE["3. Susun Panduan 4 Skenario Tugas Terpandu (Bounded Testing Tasks)"]:::process
+    end
+
+    subgraph P2 ["Fase 2: Distribusi & Sosialisasi Batasan Pengujian"]
+        RECRUIT["Undang 20-30 Responden Mahasiswa Universitas Terbuka Lintas Fakultas"]:::process
+        BRIEF["Sosialisasi Batasan: Pengujian MURNI Sistem Software, BUKAN Isi Bimbingan Konselor"]:::process
+    end
+
+    subgraph P3 ["Fase 3: Pelaksanaan 4 Skenario Tugas Terpandu oleh Mahasiswa"]
+        T1["Tugas 1: Akses Landing Page & Masuk via Google OAuth"]:::task
+        T2["Tugas 2: Pengisian Asesmen Mandiri DASS-21 & Cek Tampilan Skor Keparahan"]:::task
+        T3["Tugas 3: Pengisian Kuesioner Gaya Belajar VAK & Cek Rekomendasi Tips Belajar UT"]:::task
+        T4["Tugas 4: Eksplorasi Jurnal Mood Refleksi & Uji Tombol Darurat Safe Exit"]:::task
+    end
+
+    subgraph P4 ["Fase 4: Pengisian Kuesioner Evaluasi SUS"]
+        OPEN_GF["Responden Membuka Tautan Google Form Segera Setelah Mencoba Aplikasi"]:::process
+        FILL_SUS["Responden Menilai 10 Butir Baku SUS Berdasarkan Pengalaman Penggunaan"]:::process
+        FEEDBACK["Responden Memberikan Umpan Balik Kualitatif Kendala Antarmuka (Opsional)"]:::process
+    end
+
+    subgraph P5 ["Fase 5: Pengolahan Skor & Penentuan Kelayakan"]
+        EXPORT_XLS["Ekspor Respons ke Spreadsheet Kalkulator SUS Otomatis (UAT_SUS_Kalkulator_Otomatis.xlsx)"]:::process
+        CALC_ITEM["Hitung Kontribusi Butir: Ganjil (Skor - 1) & Genap (5 - Skor)"]:::process
+        CALC_SCORE["Hitung Skor SUS Individu = Total Kontribusi x 2,5 (Skala 0 - 100)"]:::process
+        CALC_MEAN["Hitung Nilai Rata-rata Skor SUS Seluruh Responden (Mean SUS)"]:::process
+        CHECK_SCORE{"Apakah Skor Rata-rata SUS >= 68,0? (Standar Kelaikan Industri)"}:::decision
+        REVISE["Identifikasi Masukan Pengguna & Lakukan Perbaikan Desain/Alur Sistem (Refinement)"]:::process
+        PASSED["Sistem Dinyatakan Layak Adopsi (Kategori Acceptable / Grade B - A)"]:::process
+    end
+
+    END_NODE(["Selesai: Rekapitulasi Data Dimasukkan ke Bab IV & V Laporan Akhir"]):::startend
+
+    START --> ENV
+    ENV --> GFORM
+    GFORM --> GUIDE
+    GUIDE --> RECRUIT
+    RECRUIT --> BRIEF
+    BRIEF --> T1
+    T1 --> T2
+    T2 --> T3
+    T3 --> T4
+    T4 --> OPEN_GF
+    OPEN_GF --> FILL_SUS
+    FILL_SUS --> FEEDBACK
+    FEEDBACK --> EXPORT_XLS
+    EXPORT_XLS --> CALC_ITEM
+    CALC_ITEM --> CALC_SCORE
+    CALC_SCORE --> CALC_MEAN
+    CALC_MEAN --> CHECK_SCORE
+    CHECK_SCORE -- "Tidak (< 68,0)" --> REVISE
+    REVISE --> T1
+    CHECK_SCORE -- "Ya (>= 68,0)" --> PASSED
+    PASSED --> END_NODE
+          </pre>
+        </div>
+      </div>
+      <div class="card-footer">
+        📌 <strong>Rujukan Naskah:</strong> Subbab <em>3.5.4 Prosedur dan Alur Operasional Pengujian Penerimaan Pengguna (UAT) Berbasis SUS</em>.
+      </div>
+    </div>
+
   </div>
 
   <div id="toast" class="toast">Kode berhasil disalin ke clipboard!</div>
@@ -954,46 +1055,55 @@ flowchart TD
 
       const svgClone = svg.cloneNode(true);
       const bBox = svg.getBoundingClientRect();
-      const width = bBox.width || 900;
-      const height = bBox.height || 650;
+      const width = Math.ceil(bBox.width) || 960;
+      const height = Math.ceil(bBox.height) || 680;
 
       svgClone.setAttribute('width', width);
       svgClone.setAttribute('height', height);
       svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      svgClone.setAttribute('xmlns:xhtml', 'http://www.w3.org/1999/xhtml');
+      svgClone.style.maxWidth = 'none';
+      svgClone.style.backgroundColor = '#FFFFFF';
 
       const svgString = new XMLSerializer().serializeToString(svgClone);
-      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      const URLObj = window.URL || window.webkitURL || window;
-      const blobURL = URLObj.createObjectURL(svgBlob);
+      const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
 
       const image = new Image();
+      image.crossOrigin = 'anonymous';
       image.onload = function () {
-        const scale = 2.5;
-        const canvas = document.createElement('canvas');
-        canvas.width = width * scale;
-        canvas.height = height * scale;
-        const ctx = canvas.getContext('2d');
+        try {
+          const scale = 2.5;
+          const pad = 24;
+          const canvas = document.createElement('canvas');
+          canvas.width = (width + pad * 2) * scale;
+          canvas.height = (height + pad * 2) * scale;
+          const ctx = canvas.getContext('2d');
 
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.scale(scale, scale);
-        ctx.drawImage(image, 0, 0, width, height);
+          ctx.scale(scale, scale);
+          ctx.drawImage(image, pad, pad, width, height);
 
-        URLObj.revokeObjectURL(blobURL);
-
-        canvas.toBlob(function (blob) {
+          const pngDataUrl = canvas.toDataURL('image/png');
           const downloadLink = document.createElement('a');
           downloadLink.download = (fileName || 'diagram_safespace') + '.png';
-          downloadLink.href = URLObj.createObjectURL(blob);
+          downloadLink.href = pngDataUrl;
           document.body.appendChild(downloadLink);
           downloadLink.click();
           document.body.removeChild(downloadLink);
           showToast('PNG resolusi tinggi berhasil diunduh!');
-        }, 'image/png');
+        } catch (err) {
+          console.error('Export PNG gagal:', err);
+          showToast('Gagal mengekspor PNG: ' + err.message);
+        }
+      };
+      image.onerror = function (err) {
+        console.error('Gagal memuat SVG ke Image:', err);
+        showToast('Gagal memuat diagram untuk diekspor.');
       };
 
-      image.src = blobURL;
+      image.src = svgDataUrl;
     }
   </script>
 </body>

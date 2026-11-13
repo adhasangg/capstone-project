@@ -17,9 +17,9 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: safespace_testing_db
-      POSTGRES_USER: safespace_user
-      POSTGRES_PASSWORD: safespace_test_pass_2026
+      POSTGRES_DB: ${TEST_DB_NAME:-safespace_testing_db}
+      POSTGRES_USER: ${TEST_DB_USER:-safespace_user}
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD:-safespace_test_pass_2026}
     volumes:
       - safespace_test_db_data:/var/lib/postgresql/data
       - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -29,7 +29,7 @@ services:
       - safespace-net
       - shared-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U safespace_user -d safespace_testing_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${TEST_DB_USER:-safespace_user} -d ${TEST_DB_NAME:-safespace_testing_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -45,17 +45,17 @@ services:
       NODE_ENV: development
       PORT: 3000
       ENABLE_SANDBOX: "true"
-      SANDBOX_PASSPHRASE: "safespace-evaluator-2026"
+      SANDBOX_PASSPHRASE: ${SANDBOX_PASSPHRASE:-safespace-evaluator-2026}
       DB_HOST: safespace-db-test
       DB_PORT: 5432
-      DB_USER: safespace_user
-      DB_PASSWORD: safespace_test_pass_2026
-      DB_NAME: safespace_testing_db
-      JWT_SECRET: "safespace_test_jwt_secret_key_testing_12345"
-      IDENTITY_PEPPER_SECRET: "safespace_test_identity_pepper_testing_12345"
-      ALLOWED_EMAIL_DOMAINS: "ecampus.ut.ac.id,*"
-      ADMIN_EMAILS: "fhasanblog@gmail.com"
-      COUNSELOR_EMAILS: "konselor@ecampus.ac.id"
+      DB_USER: ${TEST_DB_USER:-safespace_user}
+      DB_PASSWORD: ${TEST_DB_PASSWORD:-safespace_test_pass_2026}
+      DB_NAME: ${TEST_DB_NAME:-safespace_testing_db}
+      JWT_SECRET: ${TEST_JWT_SECRET:-safespace_test_jwt_secret_key_testing_12345}
+      IDENTITY_PEPPER_SECRET: ${TEST_IDENTITY_PEPPER_SECRET:-safespace_test_identity_pepper_testing_12345}
+      ALLOWED_EMAIL_DOMAINS: ${ALLOWED_EMAIL_DOMAINS:-ecampus.ut.ac.id,*}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-admin@ecampus.ut.ac.id}
+      COUNSELOR_EMAILS: ${COUNSELOR_EMAILS:-konselor@ecampus.ac.id}
     ports:
       - "3021:3000"
     depends_on:
@@ -90,9 +90,9 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: safespace_prod_db
-      POSTGRES_USER: safespace_user
-      POSTGRES_PASSWORD: safespace_prod_pass_2026_secured
+      POSTGRES_DB: ${PROD_DB_NAME:-safespace_prod_db}
+      POSTGRES_USER: ${PROD_DB_USER:-safespace_user}
+      POSTGRES_PASSWORD: ${PROD_DB_PASSWORD:?PROD_DB_PASSWORD is required}
     volumes:
       - safespace_prod_db_data:/var/lib/postgresql/data
       - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -102,7 +102,7 @@ services:
       - safespace-net
       - shared-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U safespace_user -d safespace_prod_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${PROD_DB_USER:-safespace_user} -d ${PROD_DB_NAME:-safespace_prod_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -120,14 +120,14 @@ services:
       ENABLE_SANDBOX: "false"
       DB_HOST: safespace-db-prod
       DB_PORT: 5432
-      DB_USER: safespace_user
-      DB_PASSWORD: safespace_prod_pass_2026_secured
-      DB_NAME: safespace_prod_db
-      JWT_SECRET: "safespace_prod_jwt_secret_key_production_98765"
-      IDENTITY_PEPPER_SECRET: "safespace_prod_identity_pepper_production_98765"
-      ALLOWED_EMAIL_DOMAINS: "ecampus.ut.ac.id,*"
-      ADMIN_EMAILS: "fhasanblog@gmail.com"
-      COUNSELOR_EMAILS: "konselor@ecampus.ac.id"
+      DB_USER: ${PROD_DB_USER:-safespace_user}
+      DB_PASSWORD: ${PROD_DB_PASSWORD:?PROD_DB_PASSWORD is required}
+      DB_NAME: ${PROD_DB_NAME:-safespace_prod_db}
+      JWT_SECRET: ${PROD_JWT_SECRET:?PROD_JWT_SECRET is required}
+      IDENTITY_PEPPER_SECRET: ${PROD_IDENTITY_PEPPER_SECRET:?PROD_IDENTITY_PEPPER_SECRET is required}
+      ALLOWED_EMAIL_DOMAINS: ${ALLOWED_EMAIL_DOMAINS:-ecampus.ut.ac.id,*}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-admin@ecampus.ut.ac.id}
+      COUNSELOR_EMAILS: ${COUNSELOR_EMAILS:-konselor@ecampus.ac.id}
     ports:
       - "3020:3000"
     depends_on:

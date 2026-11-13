@@ -19,7 +19,7 @@ export function loadApiConfig(): ApiConfig {
     .map((d: string) => d.trim())
     .filter((d: string) => d.length > 0);
 
-  const adminEmailsRaw = process.env.ADMIN_EMAILS || 'fhasanblog@gmail.com';
+  const adminEmailsRaw = process.env.ADMIN_EMAILS || 'admin@ecampus.ut.ac.id';
   const adminEmails = adminEmailsRaw
     .split(',')
     .map((e: string) => e.trim().toLowerCase())

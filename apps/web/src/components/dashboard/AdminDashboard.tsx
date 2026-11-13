@@ -327,9 +327,11 @@ export function AdminDashboard({ session }: AdminDashboardProps) {
           <div className="p-3 bg-white rounded-xl border border-slate-200/80 space-y-1">
             <span className="font-semibold text-slate-700 block">Sysadmin Pre-approved (.env)</span>
             <p className="text-[11px] text-slate-500">
-              Email resmi administrator:{' '}
-              <span className="font-mono text-slate-700 font-bold">fhasanblog@gmail.com</span>.
-              Otomatis menerima hak akses penuh saat masuk melalui Google OAuth.
+              Email resmi administrator dikonfigurasi melalui variabel lingkungan peladen{' '}
+              <code className="font-mono bg-slate-100 px-1 py-0.5 rounded text-slate-700">
+                ADMIN_EMAILS
+              </code>
+              . Akun terdaftar otomatis menerima hak akses penuh saat masuk melalui Google OAuth.
             </p>
           </div>
           <div className="p-3 bg-white rounded-xl border border-slate-200/80 space-y-1">

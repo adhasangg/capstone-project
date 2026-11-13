@@ -69,7 +69,9 @@ test.describe('E2E Test: Verifikasi Siklus Elevasi Peran Mahasiswa -> Konselor',
     // VERIFIKASI UTAMA PERBAIKAN BUG ELEVASI:
     // ==========================================
     // A. Menu pada Navbar HARUS BERUBAH menjadi menu Konselor!
-    await expect(page.getByRole('button', { name: 'Antrean Triage Konselor' }).first()).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Antrean Triage Konselor' }).first(),
+    ).toBeVisible();
     await expect(page.locator('header').getByText('Konselor').first()).toBeVisible();
 
     // B. Menu Mahasiswa (Asesmen Mandiri & Curhat Refleksi) TIDAK BOLEH tampil di navbar
@@ -82,7 +84,9 @@ test.describe('E2E Test: Verifikasi Siklus Elevasi Peran Mahasiswa -> Konselor',
 
     // D. Uji Ketahanan Sesi saat Halaman Direfresh (F5 Reload)
     await page.reload();
-    await expect(page.getByRole('button', { name: 'Antrean Triage Konselor' }).first()).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Antrean Triage Konselor' }).first(),
+    ).toBeVisible();
     await expect(page.getByRole('button', { name: 'Asesmen Mandiri' })).toHaveCount(0);
 
     // E. Ambil screenshot sebagai bukti pengujian E2E development
@@ -100,7 +104,9 @@ test.describe('E2E Test: Verifikasi Siklus Elevasi Peran Mahasiswa -> Konselor',
     const rowToReset = page.locator('tr').filter({ hasText: studentUserId }).first();
     await expect(rowToReset).toBeVisible({ timeout: 5000 });
     await rowToReset.getByRole('button', { name: 'Ubah ke Mahasiswa' }).click();
-    await expect(page.getByText(/Peran pengguna berhasil diperbarui/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Peran pengguna berhasil diperbarui/i)).toBeVisible({
+      timeout: 5000,
+    });
     await logoutBtn.click();
     await expect(page.locator('header button[title="Keluar dari sesi"]')).toHaveCount(0);
   });

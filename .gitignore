@@ -42,3 +42,11 @@ Thumbs.db
 tmp/
 scratch/
 .gitnexus/
+~$*
+tmp_test_video*/
+docs/videos/
+*.tmp
+bahan revisi/
+docs/bahan revisi/
+
+
